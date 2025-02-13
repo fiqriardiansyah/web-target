@@ -72,3 +72,16 @@ interface Package extends Product {
     product_qty?: number; //
     model_details?: string; //
 }
+
+interface SummaryResponse {
+    grand_total: number;
+    // list_discount: any[];
+    total_discount: number;
+    total_item: number;
+    total_price: number;
+    total_pembayaran: number;
+    service_charge?: number;
+    service_charge_name?: string;
+    cc_charge?: number;
+    cc_charge_name?: string;
+}

@@ -17,6 +17,18 @@ class SalesService extends BaseService {
 
     getPackageStore = "giias/cashier/get-paket-store";
 
+    summaryPrice = "giias/cashier/summary-price";
+
+    SummaryPrice<T extends SummaryResponse>(data: SummaryPrice) {
+        return this.ProxyRequest<T>(async ({ post }) => {
+            const req = await post({
+                url: this.summaryPrice,
+                data,
+            });
+            return req;
+        });
+    }
+
     GetPackageStore<T extends ProductPackage>(params: { query?: string; page?: number }) {
         return this.ProxyRequest<BasePaginationResponse<T>>(async ({ get }) => {
             const req = await get({
