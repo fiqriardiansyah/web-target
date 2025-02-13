@@ -1,0 +1,1 @@
+export { default as SummarySales } from './summary-sales';
