@@ -185,7 +185,7 @@ export default function SummarySales() {
             )}
 
             {summaryPriceMutation.data?.total_pembayaran &&
-                <Payment customerID={150} customerName="Rio Sudarsono" summaryReq={requestData} summaryRes={summaryPriceMutation.data}>
+                <Payment customerID={150} customerName="Rio Sudarsono" salesID={39} summaryReq={requestData} summaryRes={summaryPriceMutation.data}>
                     {({ openModal }) => (
                         <Button type="primary" size="large" className="mt-10" onClick={openModal}>
                             Bayar

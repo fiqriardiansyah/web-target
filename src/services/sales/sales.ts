@@ -26,6 +26,17 @@ class SalesService extends BaseService {
 
     paymentChannel = "giias/cashier/get-payment-channel"
 
+    createOrder = "giias/cashier/create-order"
+
+    CreateOrder<T extends any>(data: CreateOrderReq) {
+        return this.ProxyRequest<T>(async ({ post }) => {
+            const req = await post({
+                url: this.createOrder,
+                data,
+            });
+            return req;
+        });
+    }
 
     PaymentChannel2<T extends PaymentChannel[]>(params: { is_cc: number }) {
         return this.ProxyRequest<T>(async ({ get }) => {

@@ -42,3 +42,18 @@ interface SummaryPrice {
 interface SummaryPriceDP extends SummaryPrice{
     dp_amount: number;
 }
+
+interface CreateOrderReq {
+    is_service: number;
+    is_cc: number;
+    payment_channel_id: number;
+    notes?: string;
+    voucher: any[];
+    detail_product: ProductSummary[];
+    payment_amount?: number;
+    voucher_id: number[]
+    voucher_matrix_id: number[];
+    service_order: any[];
+    customer_id: number;
+    sales_id: number;
+}
