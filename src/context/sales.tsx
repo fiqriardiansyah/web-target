@@ -1,8 +1,11 @@
 import React from "react";
 import { SalesContext } from ".";
 import eventEmitter from "../config/event";
+import { ServiceSchema } from "../schema";
 
-export type State = { products: Product[]; packages: ProductPackage[] }
+export type State = {
+    products: Product[]; packages: ProductPackage[]; vouchers: Voucher[]; service?: ServiceSchema
+}
 
 export type SalesContextType = {
     state: State;
@@ -10,7 +13,7 @@ export type SalesContextType = {
 }
 
 export const SalesProvider = ({ children }: { children: React.ReactElement }) => {
-    const [state, setState] = React.useState<State>({ products: [], packages: [] });
+    const [state, setState] = React.useState<State>({ products: [], packages: [], vouchers: [] });
 
     React.useEffect(() => {
 

@@ -19,6 +19,18 @@ class SalesService extends BaseService {
 
     summaryPrice = "giias/cashier/summary-price";
 
+    voucher = "/giias/cashier/get-voucher"
+
+    Voucher<T extends { list: Voucher[] }>(params: { page: number }) {
+        return this.ProxyRequest<T>(async ({ get }) => {
+            const req = await get({
+                url: this.voucher,
+                config: { params }
+            });
+            return req;
+        });
+    }
+
     SummaryPrice<T extends SummaryResponse>(data: SummaryPrice) {
         return this.ProxyRequest<T>(async ({ post }) => {
             const req = await post({

@@ -1,37 +1,34 @@
-import { Button, Switch } from "antd";
-import { MainCardProduct } from "../../../components";
-import { useSalesContext } from "../../../hooks";
-import { useMutation } from "@tanstack/react-query";
-import salesService from "../../../services/sales/sales";
-import { summaryPriceSchema, SummaryPriceSchema } from "../../../schema";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { Button, Switch } from "antd";
+import { useForm } from "react-hook-form";
+import { AccountValidationModal, MainCardProduct } from "../../../components";
+import { useSalesContext } from "../../../hooks";
+import { ServiceSchema, summaryPriceSchema, SummaryPriceSchema } from "../../../schema";
+import { salesService } from "../../../services";
 import { formatCurrency } from "../../../utils";
+import ChooseVoucher from "./choose-voucher";
+import React from "react";
+import PacketAddition from "./packet-addition";
 
 export default function SummarySales() {
-    const salesContext = useSalesContext();
+    const { state: { packages, products, vouchers, service }, setState } = useSalesContext();
 
-    const { setValue, getValues } = useForm<SummaryPriceSchema>({
+    const { setValue, watch } = useForm<SummaryPriceSchema>({
         mode: "onChange",
         resolver: zodResolver(summaryPriceSchema),
     });
 
+    const valuesForm = watch();
+
     const productFlatten = (() => {
-        const packagesProduct = salesContext.state.packages
-            .map((pck) => pck.list_child)
-            .flat();
-        return [...packagesProduct, ...salesContext.state.products];
+        const packagesProduct = packages.map((pck) => pck.list_child).flat();
+        return [...packagesProduct, ...products];
     })();
 
     const summaryPriceMutation = useMutation({
-        mutationFn: async (data: SummaryPrice) =>
-            (await salesService.SummaryPrice(data)).data?.data,
-        onSuccess(data) {
-            console.log(`${data}`);
-        },
+        mutationFn: async (data: SummaryPrice) => (await salesService.SummaryPrice(data)).data?.data,
     });
-
-    if (!productFlatten.length) return null;
 
     const productSummary =
         productFlatten.map(
@@ -43,40 +40,52 @@ export default function SummarySales() {
             } as ProductSummary)
         ) || [];
 
+    const requestData: SummaryPrice = {
+        is_cc: valuesForm.is_cc,
+        is_service: valuesForm.is_service,
+        product: productSummary,
+        service: [],
+        voucher: [],
+        voucher_id: valuesForm.voucher_id,
+        voucher_matrix_id: [],
+        customer_id: 150,
+    };
+
     const onChangeService = (checked: boolean) => {
         const isService = checked ? 1 : 0;
         setValue("is_service", isService);
-
-        const data: SummaryPrice = {
-            is_service: isService,
-            product: productSummary,
-            service: getValues("service") || [],
-            voucher: getValues("voucher") || [],
-            is_cc: getValues("is_cc") || 0,
-            voucher_id: getValues("voucher_id") || [],
-            voucher_matrix_id: getValues("voucher_matrix_id") || [],
-            customer_id: getValues("customer_id") || 150,
-        };
-        summaryPriceMutation.mutate(data);
+        summaryPriceMutation.mutateAsync({ ...requestData, is_service: isService, is_cc: requestData.is_cc || 0 })
+            .then(() => {
+                (document.querySelector('#open-packet-btn') as HTMLButtonElement).click();
+            })
+            .catch(() => {
+                setValue("is_service", 0);
+            });
     };
 
     const onChangeCC = (checked: boolean) => {
         const isCC = checked ? 1 : 0;
         setValue("is_cc", isCC);
-
-        const data: SummaryPrice = {
-            is_service: getValues("is_service") || 0,
-            product: productSummary,
-            service: getValues("service") || [],
-            voucher: getValues("voucher") || [],
-            is_cc: isCC,
-            voucher_id: getValues("voucher_id") || [],
-            voucher_matrix_id: getValues("voucher_matrix_id") || [],
-            customer_id: getValues("customer_id") || 150,
-        };
-        summaryPriceMutation.mutate(data);
+        summaryPriceMutation.mutateAsync({ ...requestData, is_cc: isCC, is_service: requestData.is_service || 0 }).catch(() => {
+            setValue("is_cc", 0);
+        });
     };
 
+    const onSubmitService = (service: ServiceSchema) => {
+        setState((prev) => ({ ...prev, service }));
+    }
+
+    React.useEffect(() => {
+        if (!service) {
+            setValue("is_service", 0);
+        }
+    }, [service]);
+
+    React.useEffect(() => {
+        setValue("voucher_id", vouchers.map((v) => v.id))
+    }, [vouchers]);
+
+    if (!productFlatten.length) return null;
     return (
         <div className="w-[500px] h-fit flex flex-col gap-2 border border-gray-300 rounded p-3">
             <p className="text-gray-800 text-sm font-semibold">Ringkasan</p>
@@ -94,9 +103,38 @@ export default function SummarySales() {
                 </div>
             )}
 
+            <div className="flex flex-col gap-5 my-5">
+                {vouchers.map((voucher) => (
+                    <div key={voucher.id} className="w-full cursor-pointer h-[100px] rounded-lg border-2 border-dashed border-gray-400">
+                        <img src={voucher.image} alt={voucher.title} className="object-cover h-full w-full rounded-lg overflow-hidden" />
+                    </div>
+                ))}
+                <ChooseVoucher>
+                    {({ openModal }) => (
+                        <button onClick={openModal} className="bg-gray-100 cursor-pointer text-gray-500 text-sm font-semibold border borders border-dashed border-gray-400 rounded-xl h-[100px] w-full flex items-center justify-center">
+                            Pakai Voucher Lebih Murah
+                        </button>
+                    )}
+                </ChooseVoucher>
+                <AccountValidationModal>
+                    {({ openModal }) => (
+                        <Button onClick={openModal} type="primary" className="!bg-primary/20 !text-primary !font-semibold w-full" size="large">
+                            Tambah custom voucher
+                        </Button>
+                    )}
+                </AccountValidationModal>
+            </div>
+
             <div className="w-full text-start flex items-start mt-3">
                 <p className="flex-1 text-[14px]">Service Charge</p>
-                <Switch onChange={onChangeService} />
+                <PacketAddition onSubmit={onSubmitService}>
+                    {({ openModal }) => (
+                        <>
+                            <button onClick={openModal} id="open-packet-btn" className="w-0 h-0 pointer-events-none opacity-0">open</button>
+                            <Switch checked={!!valuesForm.is_service} onChange={onChangeService} />
+                        </>
+                    )}
+                </PacketAddition>
             </div>
 
             {summaryPriceMutation.data?.service_charge_name && (
@@ -112,7 +150,7 @@ export default function SummarySales() {
 
             <div className="w-full text-start flex items-start mt-3">
                 <p className="flex-1 text-[14px]">Credit Card Charge</p>
-                <Switch onChange={onChangeCC} />
+                <Switch checked={!!valuesForm.is_cc} onChange={onChangeCC} />
             </div>
 
             {summaryPriceMutation.data?.cc_charge_name && (
@@ -138,7 +176,7 @@ export default function SummarySales() {
                 </div>
             )}
 
-            <Button type="primary" size="large" className="mt-20">
+            <Button type="primary" size="large" className="mt-10">
                 Bayar
             </Button>
         </div>

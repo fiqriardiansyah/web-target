@@ -1,6 +1,7 @@
 import { useSalesContext } from "../../../hooks";
 import CartPackages from "./cart-packages";
 import CartProduct from "./cart-product";
+import CartService from "./cart-service";
 
 export default function CartSales() {
     const salesContext = useSalesContext();
@@ -27,6 +28,10 @@ export default function CartSales() {
         })
     }
 
+    const onServiceDelete = () => {
+        salesContext.setState((prev) => ({ ...prev, service: undefined }));
+    }
+
     return (
         <div className="flex flex-col gap-8">
             {salesContext.state?.packages?.map((p) => (
@@ -35,6 +40,7 @@ export default function CartSales() {
             {salesContext.state?.products.map((p) => (
                 <CartProduct onDelete={onProductDelete} key={p.product_id} product={p} />
             ))}
+            {salesContext.state.service && <CartService service={salesContext.state.service} onDelete={onServiceDelete} />}
         </div>
     )
 }

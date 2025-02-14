@@ -7,6 +7,7 @@ import { formatCurrency } from '../../../utils';
 interface CartProductProps {
     product?: Product;
     onDelete?: (p?: Product) => void;
+    asService?: boolean;
 }
 
 export default function CartProduct({ product, onDelete }: CartProductProps) {
@@ -41,7 +42,10 @@ export default function CartProduct({ product, onDelete }: CartProductProps) {
                 <img src={image} alt={product?.product_name} className="w-[80px] h-[70px] object-cover rounded bg-gray-200" />
                 <div className="flex flex-col">
                     <p className='text-sm'>{product?.product_name}</p>
-                    <p className="font-semibold text-sm">{product?.product_code || product?.product_code2}</p>
+                    <div className="flex items-center gap-4">
+                        <p className="font-semibold text-sm">{product?.product_code || product?.product_code2}</p>
+                        {product?.is_pkg && <p className="bg-primary/60 text-white text-xs font-semibold px-3 py-1 rounded-md">Package WO</p>}
+                    </div>
                     <div className="font-semibold flex gap-3 mt-2">
                         {formatCurrency(product?.product_price)}
                         <button className='text-primary cursor-pointer' title='Ubah'>

@@ -85,3 +85,12 @@ interface SummaryResponse {
     cc_charge?: number;
     cc_charge_name?: string;
 }
+
+interface Voucher {
+    id: number;
+    title: string;
+    description: string;
+    voucher_code: string;
+    image: string;
+    end_time: string;
+}

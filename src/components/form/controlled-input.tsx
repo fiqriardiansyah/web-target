@@ -1,5 +1,6 @@
 import { Form, Input, InputProps, FormItemProps } from "antd";
 import { Control, Controller, FieldValues, Path, ControllerProps } from "react-hook-form";
+import { formatNumberWithDots } from "../../utils";
 
 type ControlledInputProps<T extends FieldValues> = {
     name: Path<T>;
@@ -20,6 +21,8 @@ export const ControlledInput = <T extends FieldValues>({
     formItemProps,
     controllerProps,
 }: ControlledInputProps<T>) => {
+    const typeInput = inputProps?.type || 'text'
+
     return (
         <Form.Item label={label} {...formItemProps}>
             <Controller
@@ -29,9 +32,25 @@ export const ControlledInput = <T extends FieldValues>({
                 rules={rules}
                 render={({ field, fieldState: { error } }) => (
                     <>
-                        {inputProps?.type === "password"
-                            ? <Input.Password {...field} {...inputProps} name={name} status={error ? "error" : undefined} />
-                            : <Input {...field} {...inputProps} name={name} status={error ? "error" : undefined} />}
+                        {typeInput === "password" && <Input.Password {...field} {...inputProps} name={name} status={error ? "error" : undefined} />}
+                        {typeInput === "text" && <Input {...field} {...inputProps} name={name} status={error ? "error" : undefined} />}
+                        {typeInput === "number" && (
+                            <Input
+                                {...field}
+                                {...inputProps}
+                                type="text"
+                                onKeyDown={(e) => {
+                                    if (!/^\d$/.test(e.key) && e.key !== "Backspace") {
+                                        e.preventDefault();
+                                    }
+                                }}
+                                onChange={(e) => {
+                                    const value = e.target.value.replace(/\D/g, "");
+                                    field.onChange(formatNumberWithDots(parseInt(value === '' ? '0' : value)));
+                                }}
+                                name={name}
+                                status={error ? "error" : undefined} />
+                        )}
                         {error && <span className="text-red-400 italic text-[10px]">{error.message}</span>}
                     </>
                 )}
