@@ -10,8 +10,8 @@ import { salesService } from "../../../services";
 import { formatCurrency, formatNumberWithDots } from "../../../utils";
 import ChooseVoucher from "./choose-voucher";
 import CustomVoucher from "./custom-voucher";
-
 import PlaceholderPng from '../../../asset/placeholder.png';
+import Payment from "./payment";
 
 export default function SummarySales() {
     const { state: { packages, products, vouchers, services, voucherCustom }, setState } = useSalesContext();
@@ -184,9 +184,16 @@ export default function SummarySales() {
                 </div>
             )}
 
-            <Button type="primary" size="large" className="mt-10">
-                Bayar
-            </Button>
+            {summaryPriceMutation.data?.total_pembayaran &&
+                <Payment customerID={150} customerName="Rio Sudarsono" summaryReq={requestData} summaryRes={summaryPriceMutation.data}>
+                    {({ openModal }) => (
+                        <Button type="primary" size="large" className="mt-10" onClick={openModal}>
+                            Bayar
+                        </Button>
+
+                    )}
+                </Payment>
+            }
         </div>
     );
 }

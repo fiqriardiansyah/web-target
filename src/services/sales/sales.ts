@@ -1,6 +1,9 @@
 import BaseService from "../base-service";
 
 class SalesService extends BaseService {
+    PaymentChannel(arg0: { is_cc: number; }) {
+        throw new Error("Method not implemented.");
+    }
     searchCustomer = "/giias/cashier/get-customer";
 
     pendingOrder = "/giias/cashier/get-pending-order";
@@ -20,6 +23,19 @@ class SalesService extends BaseService {
     summaryPrice = "giias/cashier/summary-price";
 
     voucher = "/giias/cashier/get-voucher"
+
+    paymentChannel = "giias/cashier/get-payment-channel"
+
+
+    PaymentChannel2<T extends PaymentChannel[]>(params: { is_cc: number }) {
+        return this.ProxyRequest<T>(async ({ get }) => {
+            const req = await get({
+                url: this.paymentChannel,
+                config: { params },
+            });
+            return req;
+        });
+    }
 
     Voucher<T extends { list: Voucher[] }>(params: { page: number }) {
         return this.ProxyRequest<T>(async ({ get }) => {

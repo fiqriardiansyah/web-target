@@ -95,3 +95,8 @@ interface Voucher {
     image: string;
     end_time: string;
 }
+
+interface PaymentChannel {
+    payment_channel_id: number;
+    payment_channel_name: string;
+}
