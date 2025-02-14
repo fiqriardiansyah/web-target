@@ -1,25 +1,25 @@
-import React from "react";
-import TextArea from "antd/es/input/TextArea";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import Reportpng from '../../../asset/report.png';
+import { message, Spin } from "antd";
+import TextArea from "antd/es/input/TextArea";
+import React from "react";
+import Creditpng from '../../../asset/payment-credit.png';
+import Debitpng from '../../../asset/payment-debit.png';
+import Qrcodepng from '../../../asset/payment-qrcode.png';
+import Transferpng from '../../../asset/payment-transfer.png';
 import Tunaipng from '../../../asset/payment-tunai.png';
 import Placeholderpng from '../../../asset/placeholder.png';
-import Transferpng from '../../../asset/payment-transfer.png';
-import Qrcodepng from '../../../asset/payment-qrcode.png';
-import Debitpng from '../../../asset/payment-debit.png';
-import Creditpng from '../../../asset/payment-credit.png';
+import Reportpng from '../../../asset/report.png';
 import ModalCustom, { ModalCustomProps } from "../../../components/modal/modal";
 import salesService from "../../../services/sales/sales";
 import { formatCurrency } from "../../../utils";
-import { message, Spin } from "antd";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
 interface PaymentProps extends ModalCustomProps {
     customerID: number;
     customerName: string;
     salesID: number;
     summaryReq: SummaryPrice;
-    summaryRes: SummaryResponse;
+    summaryRes?: SummaryResponse;
 }
 
 const IMG_PAYMENT_CHANNEL = [
@@ -47,18 +47,18 @@ const IMG_PAYMENT_CHANNEL = [
 
 const Payment = ({ children, customerID, customerName, salesID, summaryReq, summaryRes, ...props }: PaymentProps) => {
     const closeRef = React.useRef<HTMLButtonElement | null>(null);
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
 
     const paymentChannelQuery = useQuery({
-        queryFn: async () => (await salesService.PaymentChannel2({ is_cc: summaryReq.is_cc })).data?.data,
+        queryFn: async () => (await salesService.PaymentChannel({ is_cc: summaryReq.is_cc })).data?.data,
         queryKey: [salesService.paymentChannel],
     });
 
     const createOrderMutation = useMutation({
         mutationFn: async (data: CreateOrderReq) => (await salesService.CreateOrder(data)).data?.data,
-        onSuccess(data) {
+        onSuccess() {
             closeRef.current?.click();
-            navigate(-1);
+            // navigate(-1);
             message.success("Success Create Order!");
         },
     });
@@ -75,7 +75,7 @@ const Payment = ({ children, customerID, customerName, salesID, summaryReq, summ
             service_order: [],
             customer_id: customerID,
             sales_id: salesID,
-            payment_amount: summaryRes.total_pembayaran,
+            payment_amount: summaryRes?.total_pembayaran,
         }
         createOrderMutation.mutate(data);
     };
@@ -93,7 +93,7 @@ const Payment = ({ children, customerID, customerName, salesID, summaryReq, summ
                     </div>
                     <div className="w-full text-start flex items-start">
                         Total Pembayaran :
-                        <p className="font-semibold ml-3"> {formatCurrency(summaryRes.total_pembayaran || 0)}</p>
+                        <p className="font-semibold ml-3"> {formatCurrency(summaryRes?.total_pembayaran || 0)}</p>
                     </div>
 
                     <p className="mt-5">Catatan : </p>

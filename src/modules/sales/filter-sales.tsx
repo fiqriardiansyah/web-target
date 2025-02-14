@@ -1,15 +1,14 @@
 import { Button, Input } from "antd";
+import { useSalesContext } from "../../hooks";
 import { ProductPackageSelectionSales } from "./product-package-selection-sales";
 import { SearchCustomerSales } from "./search-customer-sales";
 import SearchSales from "./search-sales";
 import { PacketAddition } from "./summary-sales";
-import { useSalesContext } from "../../hooks";
-import { ServiceSchema } from "../../schema";
 
 export default function FilterSales() {
-    const { setState } = useSalesContext();
+    const { setState, state: { services } } = useSalesContext();
 
-    const onServiceAdd = (service: ServiceSchema) => {
+    const onServiceAdd = (service: ServiceSummary) => {
         setState((prev) => ({ ...prev, services: [...prev.services, { id: new Date().getTime(), ...service }] }));
     }
 
@@ -29,7 +28,7 @@ export default function FilterSales() {
             </div>
             <div className="">
                 <p className="mb-1 text-sm pointer-events-none opacity-0">.</p>
-                <PacketAddition onSubmit={onServiceAdd}>
+                <PacketAddition services={services} onSubmit={onServiceAdd}>
                     {({ openModal }) => (
                         <Button onClick={openModal} type="primary" size="large" className="w-full">
                             Tambah Paket

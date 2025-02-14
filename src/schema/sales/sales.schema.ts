@@ -7,8 +7,8 @@ export const accountValidationSchema = z.object({
 
 export const customVoucherSchema = z.object({
     name: z.string().min(3),
-    price: z.string().min(1),
-    percentage: z.string().min(1),
+    price: z.string().min(1).default("0"),
+    percentage: z.string().min(1).default("0"),
 });
 
 export const serviceSchema = z.object({
@@ -26,6 +26,12 @@ export const summaryPriceSchema = z.object({
     voucher_matrix_id: z.array(z.number()),
     customer_id: number(),
 });
+
+export const editPriceSchema = z.object({
+    price: z.string().min(4),
+});
+
+export type EditPriceSchema = z.infer<typeof editPriceSchema>;
 
 export type CustomVoucherSchema = z.infer<typeof customVoucherSchema>;
 

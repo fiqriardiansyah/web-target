@@ -3,23 +3,30 @@ import { Button, Input, Space } from 'antd';
 import React from 'react';
 import TargetBgBlue from '../../../asset/target-bg-blue.png';
 import { formatCurrency } from '../../../utils';
+import CartEditPriceProduct from './cart-edit-price-product';
 
 interface CartProductProps {
     product?: Product;
     onDelete?: (p?: Product) => void;
     asService?: boolean;
+    onChangeQty?: (qty: number) => void;
+    onChangePrice?: (price: number) => void;
 }
 
-export default function CartProduct({ product, onDelete }: CartProductProps) {
+export default function CartProduct({ product, onChangePrice, onDelete, onChangeQty }: CartProductProps) {
     const [qty, setQty] = React.useState(1);
 
     const image = typeof product?.product_images === "string"
         ? product?.product_images
         : product?.product_images?.length
             ? product?.product_images[0]
-            : TargetBgBlue
+            : TargetBgBlue;
 
-    const onChangeQty = (e: React.ChangeEvent<HTMLInputElement>) => {
+    React.useEffect(() => {
+        if (onChangeQty) onChangeQty(qty);
+    }, [qty]);
+
+    const onChangeQtyInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = e.target.value.replace(/\D/g, "");
         const qty = parseInt(newValue === '' ? '0' : newValue);
         if (qty >= (product?.stock || 1)) {
@@ -29,8 +36,12 @@ export default function CartProduct({ product, onDelete }: CartProductProps) {
         setQty(qty);
     };
 
+    const onChangePriceInput = (price: number) => {
+        if (onChangePrice) onChangePrice(price);
+    }
+
     const increaseQty = () => setQty((prev) => prev >= (product?.stock || 1) ? prev : prev + 1);
-    const decreaseQty = () => setQty((prev) => !prev ? 0 : prev - 1);
+    const decreaseQty = () => setQty((prev) => prev <= 1 ? 1 : prev - 1);
 
     const onDeleteClick = () => {
         if (onDelete) onDelete(product)
@@ -48,9 +59,20 @@ export default function CartProduct({ product, onDelete }: CartProductProps) {
                     </div>
                     <div className="font-semibold flex gap-3 mt-2">
                         {formatCurrency(product?.product_price)}
-                        <button className='text-primary cursor-pointer' title='Ubah'>
-                            <EditOutlined />
-                        </button>
+                        <CartEditPriceProduct
+                            onSubmit={onChangePriceInput}
+                            product={product}
+                            title={
+                                <p className='font-semibold'>
+                                    Ubah Harga Produk <br />
+                                    <span className='text-red-400 text-[12px] font-light'>Harga terbaru harus lebih besar dari harga sebelumnya</span>
+                                </p>} >
+                            {({ openModal }) => (
+                                <button onClick={openModal} className='text-primary cursor-pointer' title='Ubah'>
+                                    <EditOutlined />
+                                </button>
+                            )}
+                        </CartEditPriceProduct>
                     </div>
                 </div>
             </div>
@@ -61,7 +83,7 @@ export default function CartProduct({ product, onDelete }: CartProductProps) {
                         <Button title='Kurang' onClick={decreaseQty} size="large" className='!bg-primary/80' icon={<MinusOutlined />} type="primary" />
                         <Input
                             value={qty}
-                            onChange={onChangeQty}
+                            onChange={onChangeQtyInput}
                             onKeyDown={(e) => {
                                 if (!/^\d$/.test(e.key) && e.key !== "Backspace") {
                                     e.preventDefault();

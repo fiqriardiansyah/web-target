@@ -16,7 +16,7 @@ interface AccountValidationModal extends ModalCustomProps {
 const AccountValidationModal = ({ onSuccess, children, ...props }: AccountValidationModal) => {
     const closeRef = React.useRef<HTMLButtonElement | null>(null);
 
-    const { control, handleSubmit } = useForm<AccountValidationSchema>({
+    const { control, handleSubmit, reset } = useForm<AccountValidationSchema>({
         mode: 'onChange',
         resolver: zodResolver(accountValidationSchema),
     });
@@ -24,6 +24,7 @@ const AccountValidationModal = ({ onSuccess, children, ...props }: AccountValida
     const checkAuthMutation = useMutation({
         mutationFn: async (data: AccountValidationSchema) => (await authService.CheckAuth(data)).data?.data,
         onSuccess() {
+            reset();
             closeRef.current?.click();
             onSuccess();
         },

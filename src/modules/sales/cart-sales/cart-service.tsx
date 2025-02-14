@@ -1,11 +1,10 @@
 import { DeleteOutlined } from '@ant-design/icons';
 import { Input } from 'antd';
-import { ServiceSchema } from '../../../schema';
 import { formatCurrency } from '../../../utils';
 
 interface CartServiceProps {
-    service?: { id: number } & ServiceSchema;
-    onDelete?: (s?: { id: number } & ServiceSchema) => void;
+    service?: { id: number } & ServiceSummary;
+    onDelete?: (s?: { id: number } & ServiceSummary) => void;
 }
 
 export default function CartService({ service, onDelete }: CartServiceProps) {

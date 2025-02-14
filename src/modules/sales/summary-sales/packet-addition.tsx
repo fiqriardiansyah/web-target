@@ -7,20 +7,26 @@ import { serviceSchema, ServiceSchema } from "../../../schema";
 import { parseNumberFromDots } from "../../../utils";
 
 interface PackageAdditionProps extends ModalCustomProps {
-    onSubmit?: (service: ServiceSchema) => void;
+    onSubmit?: (service: ServiceSummary) => void;
+    services?: ({ id: number } & ServiceSummary)[];
 }
 
-export default function PacketAddition({ onSubmit, children, ...props }: PackageAdditionProps) {
+export default function PacketAddition({ onSubmit, services = [], children, ...props }: PackageAdditionProps) {
     const closeRef = React.useRef<HTMLButtonElement | null>(null);
 
-    const { control, handleSubmit, reset } = useForm<ServiceSchema>({
+    const { control, handleSubmit, reset, setError } = useForm<ServiceSchema>({
         mode: 'onChange',
         resolver: zodResolver(serviceSchema),
     });
 
     const onSubmitForm = (data: ServiceSchema) => {
+        if (services.find((s) => s.service_name === data.service_name)) {
+            setError("service_name", { message: "Paket dengan nama " + data.service_name + " sudah ada" });
+            return;
+        }
+
         const price = parseNumberFromDots(data.price);
-        if (onSubmit) onSubmit({ ...data, price: price.toString() });
+        if (onSubmit) onSubmit({ ...data, price });
         closeRef.current?.click();
         reset();
     };

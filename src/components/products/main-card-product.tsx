@@ -1,9 +1,10 @@
-import { formatCurrency } from "../../utils";
+import { formatCurrency, formatNumberWithDots } from "../../utils";
 import Placeholder from '../../asset/placeholder.png'
 
 interface MainCardProductProps {
     product?: Partial<Product>;
     onClick?: (p?: Partial<Product>) => void;
+    discount?: number;
 }
 
 function AsCard({ product, onClick }: MainCardProductProps) {
@@ -38,7 +39,7 @@ function AsCard({ product, onClick }: MainCardProductProps) {
     )
 }
 
-function AsListView({ product, onClick }: MainCardProductProps) {
+function AsListView({ product, onClick, discount = undefined }: MainCardProductProps) {
     const image = typeof product?.product_images === "string"
         ? product?.product_images
         : product?.product_images?.length
@@ -50,12 +51,25 @@ function AsListView({ product, onClick }: MainCardProductProps) {
     }
 
     return (
-        <button onClick={onClickProduct} title={onClick ? "Klik untuk hapus" : ""} className="w-full text-start cursor-pointer flex items-start">
-            <img src={image} alt={product?.product_name} className="w-[70px] h-[50px] object-cover bg-gray-100 mr-2" />
-            <div className="flex-1 text-[9px]">
-                {product?.product_name}
+        <button onClick={onClickProduct} title={onClick ? "Klik untuk hapus" : ""} className="text-start">
+            <div className="w-full  cursor-pointer flex items-start">
+                <img src={image} alt={product?.product_name} className="w-[70px] h-[50px] object-cover bg-gray-100 mr-2" />
+                <div className="flex-1">
+                    <div className="flex gap-1">
+                        <div className="flex-1 text-[9px]">
+                            {product?.product_name}
+                        </div>
+                        <p className="font-bold text-[12px] ml-2">{formatCurrency(product?.product_price)}</p>
+                    </div>
+                    {discount ? (
+                        <div className="w-full flex mt-2 items-center justify-between">
+                            <p className="text-red-400 text-[10px]">Discount</p>
+                            <p className="text-red-400 text-[10px]">Rp. {formatNumberWithDots(discount)}</p>
+                        </div>
+                    ) : null}
+                </div>
             </div>
-            <p className="font-bold text-[12px]">{formatCurrency(product?.product_price)}</p>
+
         </button>
     )
 }
@@ -83,6 +97,24 @@ function AsMiniCard({ product, onClick }: MainCardProductProps) {
     )
 }
 
+function Simple({ product }: MainCardProductProps) {
+    const image = typeof product?.product_images === "string"
+        ? product?.product_images
+        : product?.product_images?.length
+            ? product?.product_images[0]
+            : Placeholder
+
+    return (
+        <div className="w-full cursor-pointer flex items-start">
+            <img src={image} alt={product?.product_name} className="w-[70px] h-[50px] object-cover rounded bg-gray-100 mr-2" />
+            <div className="flex flex-col gap-2">
+                {product?.product_name}
+                <p className="font-bold text-[12px]">{formatCurrency(product?.product_price)}</p>
+            </div>
+        </div>
+    )
+}
+
 
 const MainCardProduct = () => { }
 
@@ -91,5 +123,7 @@ MainCardProduct.AsCard = AsCard;
 MainCardProduct.AsListView = AsListView;
 
 MainCardProduct.AsMiniCard = AsMiniCard;
+
+MainCardProduct.Simple = Simple;
 
 export default MainCardProduct;

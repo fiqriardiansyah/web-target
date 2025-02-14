@@ -10,16 +10,17 @@ interface CustomVoucherProps extends ModalCustomProps {
     products?: Partial<Product>[];
     services?: ({ id: number } & ServiceSchema)[];
     onSubmit?: (v: VoucherCustomSummary) => void;
+    voucherCustoms?: VoucherCustomSummary[];
 }
 
-const CustomVoucher = ({ onSubmit, products = [], services = [], children, ...props }: CustomVoucherProps) => {
+const CustomVoucher = ({ onSubmit, voucherCustoms = [], products = [], services = [], children, ...props }: CustomVoucherProps) => {
 
     const closeRef = React.useRef<HTMLButtonElement | null>(null);
     const [typeCut, setTypeCut] = React.useState<"percentage" | "price">("percentage");
     const [selectedProduct, setSelectedProduct] = React.useState<number[]>([]);
     const [selectedService, setSelectedService] = React.useState<number[]>([]);
 
-    const { control, handleSubmit, watch, setValue, reset } = useForm<CustomVoucherSchema>({
+    const { control, handleSubmit, watch, setValue, reset, setError } = useForm<CustomVoucherSchema>({
         mode: 'onChange',
         resolver: zodResolver(customVoucherSchema),
     });
@@ -67,7 +68,11 @@ const CustomVoucher = ({ onSubmit, products = [], services = [], children, ...pr
     }
 
     const onSubmitForm = (data: CustomVoucherSchema) => {
-        console.log(data);
+        if (voucherCustoms.find((v) => v.name === data.name)) {
+            setError("name", { message: "Voucher dengan nama " + data.name + " Sudah ada" })
+            return;
+        }
+
         const customVoucher: VoucherCustomSummary = {
             name: data.name,
             price: parseNumberFromDots(data.price),
@@ -80,6 +85,7 @@ const CustomVoucher = ({ onSubmit, products = [], services = [], children, ...pr
         reset();
         setSelectedProduct([]);
         setSelectedService([]);
+        setTypeCut("percentage");
     };
 
     const onClickTypeCut = (type: "percentage" | "price") => {
@@ -144,7 +150,7 @@ const CustomVoucher = ({ onSubmit, products = [], services = [], children, ...pr
                                         </div>
                                     ))}
                                 </div>
-                                <Button disabled={!selectedProduct.length} size="large" type="primary" htmlType="submit" className="w-full">
+                                <Button disabled={!selectedProduct.length && !selectedService.length} size="large" type="primary" htmlType="submit" className="w-full">
                                     Simpan
                                 </Button>
                             </Space>

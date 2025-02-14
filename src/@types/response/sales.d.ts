@@ -75,16 +75,34 @@ interface Package extends Product {
 }
 
 interface SummaryResponse {
-    grand_total: number;
-    // list_discount: any[];
-    total_discount: number;
     total_item: number;
     total_price: number;
+    total_discount: number;
+    grand_total: number;
+    list_voucher_custom: ListVoucherCustom[];
+    list_discount: ListDiscount[];
+    service_charge: number;
+    service_charge_name: string;
+    cc_charge: number;
+    cc_charge_name: string;
     total_pembayaran: number;
-    service_charge?: number;
-    service_charge_name?: string;
-    cc_charge?: number;
-    cc_charge_name?: string;
+}
+
+interface ListDiscount {
+    product_id: number | null;
+    discount_name: string;
+    freeProduct: string;
+    service_name: null | string;
+    discount_price: number;
+}
+
+interface ListVoucherCustom {
+    name: string;
+    price: number;
+    percentage: number;
+    product_id: null;
+    product: ProductVoucher[];
+    service: ServiceSummary[];
 }
 
 interface Voucher {

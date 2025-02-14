@@ -21,6 +21,7 @@ interface ServiceVoucher {
 }
 
 interface VoucherCustomSummary {
+    id?: number;
     name: string;
     price: number;
     percentage: number;
@@ -39,7 +40,7 @@ interface SummaryPrice {
     customer_id: number;
 }
 
-interface SummaryPriceDP extends SummaryPrice{
+interface SummaryPriceDP extends SummaryPrice {
     dp_amount: number;
 }
 
@@ -48,12 +49,12 @@ interface CreateOrderReq {
     is_cc: number;
     payment_channel_id: number;
     notes?: string;
-    voucher: any[];
+    voucher: unknown[];
     detail_product: ProductSummary[];
     payment_amount?: number;
     voucher_id: number[]
     voucher_matrix_id: number[];
-    service_order: any[];
+    service_order: unknown[];
     customer_id: number;
     sales_id: number;
 }

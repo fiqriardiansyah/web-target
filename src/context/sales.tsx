@@ -1,10 +1,9 @@
 import React from "react";
 import { SalesContext } from ".";
 import eventEmitter from "../config/event";
-import { ServiceSchema } from "../schema";
 
 export type State = {
-    products: Product[]; packages: ProductPackage[]; vouchers: Voucher[]; services: ({ id: number } & ServiceSchema)[]; voucherCustom: VoucherCustomSummary[]
+    products: Product[]; packages: ProductPackage[]; vouchers: Voucher[]; services: ({ id: number } & ServiceSummary)[]; voucherCustom: VoucherCustomSummary[]
 }
 
 export type SalesContextType = {
