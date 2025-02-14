@@ -1,6 +1,7 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 import { ADDRESS_USER, COMPANY_USER, EMAIL_USER, NAME_USER, NPWP_USER, TOKEN_USER } from "../@constant/constant";
+import { authService } from "../services";
 
 const axiosClient = axios.create();
 
@@ -24,8 +25,8 @@ axiosClient.interceptors.request.use(
 
 axiosClient.interceptors.response.use(
     (res) => {
-        const { status, data } = res;
-        if (status === 401 || data?.status === 401) {
+        const { status, data, config } = res;
+        if ((status === 401 || data?.status === 401) && config.url !== authService.checkAuth) {
             Cookies.remove(TOKEN_USER);
             Cookies.remove(NAME_USER);
             Cookies.remove(ADDRESS_USER);
@@ -37,7 +38,7 @@ axiosClient.interceptors.response.use(
         return res;
     },
     (error) => {
-        if (error.response?.status === 401) {
+        if (error.response?.status === 401 && error.config?.url !== authService.checkAuth) {
             Cookies.remove(TOKEN_USER);
             Cookies.remove(NAME_USER);
             Cookies.remove(ADDRESS_USER);

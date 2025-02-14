@@ -7,3 +7,7 @@ interface AuthResponse {
     npwp: string;
     token: string;
 }
+
+interface CheckAuthResponse {
+    id: number;
+}

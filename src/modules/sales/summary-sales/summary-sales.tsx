@@ -1,18 +1,20 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { Button, Switch } from "antd";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { AccountValidationModal, MainCardProduct } from "../../../components";
 import { useSalesContext } from "../../../hooks";
-import { ServiceSchema, summaryPriceSchema, SummaryPriceSchema } from "../../../schema";
+import { summaryPriceSchema, SummaryPriceSchema } from "../../../schema";
 import { salesService } from "../../../services";
-import { formatCurrency } from "../../../utils";
+import { formatCurrency, formatNumberWithDots } from "../../../utils";
 import ChooseVoucher from "./choose-voucher";
-import React from "react";
-import PacketAddition from "./packet-addition";
+import CustomVoucher from "./custom-voucher";
+
+import PlaceholderPng from '../../../asset/placeholder.png';
 
 export default function SummarySales() {
-    const { state: { packages, products, vouchers, service }, setState } = useSalesContext();
+    const { state: { packages, products, vouchers, services, voucherCustom }, setState } = useSalesContext();
 
     const { setValue, watch } = useForm<SummaryPriceSchema>({
         mode: "onChange",
@@ -41,8 +43,8 @@ export default function SummarySales() {
         ) || [];
 
     const requestData: SummaryPrice = {
-        is_cc: valuesForm.is_cc,
-        is_service: valuesForm.is_service,
+        is_cc: valuesForm.is_cc || 0,
+        is_service: valuesForm.is_service || 0,
         product: productSummary,
         service: [],
         voucher: [],
@@ -71,27 +73,25 @@ export default function SummarySales() {
         });
     };
 
-    const onSubmitService = (service: ServiceSchema) => {
-        setState((prev) => ({ ...prev, service }));
+    const onAddCustomVoucher = (v: VoucherCustomSummary) => {
+        setState((prev) => ({ ...prev, voucherCustom: [...prev.voucherCustom, v] }));
+        summaryPriceMutation.mutateAsync({ ...requestData, voucher: [...voucherCustom, v] });
     }
-
-    React.useEffect(() => {
-        if (!service) {
-            setValue("is_service", 0);
-        }
-    }, [service]);
 
     React.useEffect(() => {
         setValue("voucher_id", vouchers.map((v) => v.id))
     }, [vouchers]);
 
-    if (!productFlatten.length) return null;
+    if (!productFlatten.length && !services.length) return null;
     return (
         <div className="w-[500px] h-fit flex flex-col gap-2 border border-gray-300 rounded p-3">
             <p className="text-gray-800 text-sm font-semibold">Ringkasan</p>
             <div className="flex flex-col gap-3 mt-5">
                 {productFlatten.map((p) => (
                     <MainCardProduct.AsListView key={p.product_id} product={p} />
+                ))}
+                {services.map((s) => (
+                    <MainCardProduct.AsListView key={s.id} product={{ product_name: s.service_name, product_price: Number(s.price), product_images: PlaceholderPng }} />
                 ))}
             </div>
             {summaryPriceMutation.data?.total_price && (
@@ -116,25 +116,22 @@ export default function SummarySales() {
                         </button>
                     )}
                 </ChooseVoucher>
-                <AccountValidationModal>
+                <CustomVoucher onSubmit={onAddCustomVoucher} products={productFlatten} services={services}>
                     {({ openModal }) => (
-                        <Button onClick={openModal} type="primary" className="!bg-primary/20 !text-primary !font-semibold w-full" size="large">
-                            Tambah custom voucher
-                        </Button>
+                        <AccountValidationModal onSuccess={openModal}>
+                            {({ openModal }) => (
+                                <Button onClick={openModal} disabled={voucherCustom.length >= 3} type="primary" className="!bg-primary/20 !text-primary !font-semibold w-full" size="large">
+                                    Tambah custom voucher
+                                </Button>
+                            )}
+                        </AccountValidationModal>
                     )}
-                </AccountValidationModal>
+                </CustomVoucher>
             </div>
 
             <div className="w-full text-start flex items-start mt-3">
                 <p className="flex-1 text-[14px]">Service Charge</p>
-                <PacketAddition onSubmit={onSubmitService}>
-                    {({ openModal }) => (
-                        <>
-                            <button onClick={openModal} id="open-packet-btn" className="w-0 h-0 pointer-events-none opacity-0">open</button>
-                            <Switch checked={!!valuesForm.is_service} onChange={onChangeService} />
-                        </>
-                    )}
-                </PacketAddition>
+                <Switch checked={!!valuesForm.is_service} onChange={onChangeService} />
             </div>
 
             {summaryPriceMutation.data?.service_charge_name && (
@@ -161,6 +158,17 @@ export default function SummarySales() {
                     <p className="text-[12px] font-semibold">
                         {formatCurrency(summaryPriceMutation.data.cc_charge)}
                     </p>
+                </div>
+            )}
+
+            {voucherCustom.length && (
+                <div className="mt-4">
+                    <p className="flex-1 text-[14px] mb-2">Custom Voucher</p>
+                    <div className="flex flex-col gap-1">
+                        {voucherCustom.map((v) => (
+                            <p className="text-gray-400 text-sm">{v.name} <span className="text-red-400 ml-2">({v.price ? 'Rp.' + formatNumberWithDots(v.price) : v.percentage + '%'})</span></p>
+                        ))}
+                    </div>
                 </div>
             )}
 

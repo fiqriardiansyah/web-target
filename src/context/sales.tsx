@@ -4,7 +4,7 @@ import eventEmitter from "../config/event";
 import { ServiceSchema } from "../schema";
 
 export type State = {
-    products: Product[]; packages: ProductPackage[]; vouchers: Voucher[]; service?: ServiceSchema
+    products: Product[]; packages: ProductPackage[]; vouchers: Voucher[]; services: ({ id: number } & ServiceSchema)[]; voucherCustom: VoucherCustomSummary[]
 }
 
 export type SalesContextType = {
@@ -13,7 +13,7 @@ export type SalesContextType = {
 }
 
 export const SalesProvider = ({ children }: { children: React.ReactElement }) => {
-    const [state, setState] = React.useState<State>({ products: [], packages: [], vouchers: [] });
+    const [state, setState] = React.useState<State>({ products: [], packages: [], vouchers: [], services: [], voucherCustom: [] });
 
     React.useEffect(() => {
 

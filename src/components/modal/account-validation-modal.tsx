@@ -6,8 +6,14 @@ import { useForm } from "react-hook-form";
 import { accountValidationSchema, AccountValidationSchema } from "../../schema";
 import { ControlledInput } from "../form";
 import ModalCustom, { ModalCustomProps } from "./modal";
+import { useMutation } from "@tanstack/react-query";
+import { authService } from "../../services";
 
-const AccountValidationModal = ({ children, ...props }: ModalCustomProps) => {
+interface AccountValidationModal extends ModalCustomProps {
+    onSuccess: () => void;
+}
+
+const AccountValidationModal = ({ onSuccess, children, ...props }: AccountValidationModal) => {
     const closeRef = React.useRef<HTMLButtonElement | null>(null);
 
     const { control, handleSubmit } = useForm<AccountValidationSchema>({
@@ -15,8 +21,16 @@ const AccountValidationModal = ({ children, ...props }: ModalCustomProps) => {
         resolver: zodResolver(accountValidationSchema),
     });
 
+    const checkAuthMutation = useMutation({
+        mutationFn: async (data: AccountValidationSchema) => (await authService.CheckAuth(data)).data?.data,
+        onSuccess() {
+            closeRef.current?.click();
+            onSuccess();
+        },
+    })
+
     const onSubmit = (data: AccountValidationSchema) => {
-        console.log(data);
+        checkAuthMutation.mutateAsync(data);
     };
 
     return (
@@ -30,7 +44,7 @@ const AccountValidationModal = ({ children, ...props }: ModalCustomProps) => {
                         <Space direction="vertical" className="w-full">
                             <ControlledInput label="Email" name="email" inputProps={{ prefix: <MailOutlined />, placeholder: 'Email', size: 'large' }} control={control} />
                             <ControlledInput label="Password" name="password" inputProps={{ prefix: <LockOutlined />, placeholder: 'Password', type: "password", size: 'large' }} control={control} />
-                            <Button size="large" type="primary" htmlType="submit">
+                            <Button loading={checkAuthMutation.isPending} className="w-full" size="large" type="primary" htmlType="submit">
                                 Validasi
                             </Button>
                         </Space>

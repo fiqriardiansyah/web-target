@@ -1,4 +1,5 @@
 import { useSalesContext } from "../../../hooks";
+import { ServiceSchema } from "../../../schema";
 import CartPackages from "./cart-packages";
 import CartProduct from "./cart-product";
 import CartService from "./cart-service";
@@ -28,8 +29,8 @@ export default function CartSales() {
         })
     }
 
-    const onServiceDelete = () => {
-        salesContext.setState((prev) => ({ ...prev, service: undefined }));
+    const onServiceDelete = (service?: { id: number } & ServiceSchema) => {
+        salesContext.setState((prev) => ({ ...prev, services: prev.services.filter((s) => s.id !== service?.id) }));
     }
 
     return (
@@ -40,7 +41,9 @@ export default function CartSales() {
             {salesContext.state?.products.map((p) => (
                 <CartProduct onDelete={onProductDelete} key={p.product_id} product={p} />
             ))}
-            {salesContext.state.service && <CartService service={salesContext.state.service} onDelete={onServiceDelete} />}
+            {salesContext.state.services?.map((s) => (
+                <CartService key={s.id} service={s} onDelete={onServiceDelete} />
+            ))}
         </div>
     )
 }

@@ -6,6 +6,8 @@ import BaseService from "../base-service";
 class AuthService extends BaseService {
     signIn = "/giias/cashier/sign-in";
 
+    checkAuth = "/giias/cashier/check-auth";
+
     auth: Auth;
 
     config: FirebaseApp;
@@ -34,6 +36,24 @@ class AuthService extends BaseService {
                 data,
             });
             return req;
+        });
+    }
+
+    _checkAuthToServer<T extends CheckAuthResponse>(data: IdTokenEmail) {
+        return this.ProxyRequest<T>(async ({ post }) => {
+            const req = await post({
+                url: this.checkAuth,
+                data,
+            });
+            return req;
+        });
+    }
+
+    CheckAuth<T extends CheckAuthResponse>(data: SignInParam) {
+        return this.ProxyRequest<T>(async () => {
+            const idToken = await this._signInToFirebase(data);
+            const authData = await this._checkAuthToServer<T>({ email: data.email, idToken });
+            return authData;
         });
     }
 

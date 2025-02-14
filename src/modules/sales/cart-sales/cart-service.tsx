@@ -4,8 +4,8 @@ import { ServiceSchema } from '../../../schema';
 import { formatCurrency } from '../../../utils';
 
 interface CartServiceProps {
-    service?: ServiceSchema;
-    onDelete?: (s?: ServiceSchema) => void;
+    service?: { id: number } & ServiceSchema;
+    onDelete?: (s?: { id: number } & ServiceSchema) => void;
 }
 
 export default function CartService({ service, onDelete }: CartServiceProps) {

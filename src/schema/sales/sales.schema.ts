@@ -1,8 +1,14 @@
 import { number, z } from "zod";
 
 export const accountValidationSchema = z.object({
-    email: z.string().min(5),
+    email: z.string().email(),
     password: z.string().min(4),
+});
+
+export const customVoucherSchema = z.object({
+    name: z.string().min(3),
+    price: z.string().min(1),
+    percentage: z.string().min(1),
 });
 
 export const serviceSchema = z.object({
@@ -20,6 +26,8 @@ export const summaryPriceSchema = z.object({
     voucher_matrix_id: z.array(z.number()),
     customer_id: number(),
 });
+
+export type CustomVoucherSchema = z.infer<typeof customVoucherSchema>;
 
 export type AccountValidationSchema = z.infer<typeof accountValidationSchema>;
 

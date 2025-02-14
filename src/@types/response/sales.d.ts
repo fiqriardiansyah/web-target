@@ -60,6 +60,7 @@ interface Product {
     stock: number;
     is_pkg: boolean;
     store?: number;
+    qty?: number;
 }
 
 interface ProductPackage {
