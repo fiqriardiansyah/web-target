@@ -22,13 +22,13 @@ interface PendingOrderList {
 }
 
 interface PendingOrderItem {
-    product_id: number | string;
-    product_qty: string;
+    product_id: number;
+    product_qty: number;
     product_price: string;
     stock: number;
     product_code1: string;
     product_name: string;
-    product_images: null;
+    product_images: string | string[]
     is_pkg: boolean;
 }
 

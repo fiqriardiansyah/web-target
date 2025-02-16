@@ -7,25 +7,49 @@ class SalesService extends BaseService {
 
     searchSales = "/giias/cashier/get-sales-name";
 
-    deletePendingOrder = "/cashier/delete-pending-order";
+    deletePendingOrder = "/giias/cashier/delete-pending-order";
 
-    getProduct = "giias/cashier/get-product";
+    getProduct = "/giias/cashier/get-product";
 
-    getProductStore = "giias/cashier/get-product-store";
+    getProductStore = "/giias/cashier/get-product-store";
 
-    getPackage = "giias/cashier/get-paket";
+    getPackage = "/giias/cashier/get-paket";
 
-    getPackageStore = "giias/cashier/get-paket-store";
+    getPackageStore = "/giias/cashier/get-paket-store";
 
-    summaryPrice = "giias/cashier/summary-price";
+    summaryPrice = "/giias/cashier/summary-price";
 
     voucher = "/giias/cashier/get-voucher"
 
-    paymentChannel = "giias/cashier/get-payment-channel"
+    paymentChannel = "/giias/cashier/get-payment-channel"
 
-    createOrder = "giias/cashier/create-order"
+    createOrder = "/giias/cashier/create-order"
 
-    CreateOrder<T extends string>(data: CreateOrderReq) {
+    createOrderDp = "/giias/cashier/create-order-down-payment"
+
+    draftOrder = "/giias/cashier/draft-order";
+
+    DraftOrder<T extends string>(data: Partial<CreateOrderReq>) {
+        return this.ProxyRequest<T>(async ({ post }) => {
+            const req = await post({
+                url: this.draftOrder,
+                data,
+            });
+            return req;
+        });
+    }
+
+    CreateOrderDp<T extends string>(data: Partial<CreateOrderReq>) {
+        return this.ProxyRequest<T>(async ({ post }) => {
+            const req = await post({
+                url: this.createOrderDp,
+                data,
+            });
+            return req;
+        });
+    }
+
+    CreateOrder<T extends string>(data: Partial<CreateOrderReq>) {
         return this.ProxyRequest<T>(async ({ post }) => {
             const req = await post({
                 url: this.createOrder,

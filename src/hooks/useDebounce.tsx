@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useEffect } from "react";
 
-export function useDebounce(value?: string, delay = 500, action = (val?: string) => { }) {
+export function useDebounce(value?: string, delay = 500, action = (_val?: string) => { }) {
     const [debouncedValue, setDebouncedValue] = useState(value);
 
     useEffect(() => {

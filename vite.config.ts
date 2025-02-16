@@ -1,7 +1,8 @@
-import { defineConfig } from 'vite'
-import tailwindcss from '@tailwindcss/vite'
-import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite';
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
 import federation from "@originjs/vite-plugin-federation";
+
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -13,6 +14,7 @@ export default defineConfig({
       filename: "remoteEntry.js",
       exposes: {
         "./SalesPage": "./src/pages/sales/sales.tsx",
+        "./App": "./src/app.tsx",
       },
       shared: ["react", "react-dom"],
     }),

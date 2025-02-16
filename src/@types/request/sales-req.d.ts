@@ -37,7 +37,7 @@ interface SummaryPrice {
     is_cc: number;
     voucher_id: number[];
     voucher_matrix_id: number[];
-    customer_id: number;
+    customer_id?: number;
 }
 
 interface SummaryPriceDP extends SummaryPrice {
@@ -45,6 +45,7 @@ interface SummaryPriceDP extends SummaryPrice {
 }
 
 interface CreateOrderReq {
+    order_draft_id?: number;
     is_service: number;
     is_cc: number;
     payment_channel_id: number;

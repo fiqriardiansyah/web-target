@@ -7,7 +7,13 @@ import { salesService } from '../../../services';
 
 const { confirm } = Modal;
 
-export default function OrderCard({ order, refreshPendingOrder }: { order: PendingOrderList, refreshPendingOrder?: () => void }) {
+interface OrderCardProps {
+    order: PendingOrderList,
+    refreshPendingOrder?: () => void,
+    onChooseOrder?: (list: PendingOrderList) => void,
+}
+
+export default function OrderCard({ order, refreshPendingOrder, onChooseOrder }: OrderCardProps) {
 
     const deleteMutation = useMutation({
         mutationFn: async (orderId: number | string) => (await salesService.DeletePendingOrder({ order_id: orderId })).data?.data,
@@ -47,7 +53,7 @@ export default function OrderCard({ order, refreshPendingOrder }: { order: Pendi
             <div className="flex flex-col gap-2 justify-center">
                 {!order?.dp_amount ? (
                     <>
-                        <Button type='primary' size='large' className='w-[150px]'>
+                        <Button onClick={() => onChooseOrder ? onChooseOrder(order) : {}} type='primary' size='large' className='w-[150px]'>
                             Pilih Order
                         </Button>
                         <Button loading={deleteMutation.isPending} onClick={showDeleteConfirm} type='primary' danger size='large' className='w-[150px]'>
@@ -55,7 +61,7 @@ export default function OrderCard({ order, refreshPendingOrder }: { order: Pendi
                         </Button>
                     </>
                 ) : (
-                    <Button type='primary' size='large' className='w-[150px] !bg-primary/60 !shadow-lg'>
+                    <Button type='primary' size='large' className='w-[150px] !bg-primary/60 !shadow-lg opacity-50 !cursor-not-allowed'>
                         Bayar Order
                     </Button>
                 )}

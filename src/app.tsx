@@ -1,14 +1,17 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import React from "react";
+import { BrowserRouter } from "react-router-dom";
 import { GlobalProvider } from "./context";
-import { AppRoutes } from "./routes";
 
 const queryClient = new QueryClient();
 
-const App = () => {
+const App = ({ children }: { children: React.ReactElement }) => {
     return (
         <QueryClientProvider client={queryClient}>
             <GlobalProvider>
-                <AppRoutes />
+                <BrowserRouter>
+                    {children}
+                </BrowserRouter>
             </GlobalProvider>
         </QueryClientProvider>
     )

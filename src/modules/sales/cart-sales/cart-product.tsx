@@ -1,9 +1,9 @@
 import { DeleteOutlined, EditOutlined, MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Input, Space } from 'antd';
 import React from 'react';
-import TargetBgBlue from '../../../asset/target-bg-blue.png';
 import { formatCurrency } from '../../../utils';
 import CartEditPriceProduct from './cart-edit-price-product';
+import Placeholder from '../../../asset/placeholder.png';
 
 interface CartProductProps {
     product?: Product;
@@ -20,7 +20,7 @@ export default function CartProduct({ product, onChangePrice, onDelete, onChange
         ? product?.product_images
         : product?.product_images?.length
             ? product?.product_images[0]
-            : TargetBgBlue;
+            : Placeholder;
 
     React.useEffect(() => {
         if (onChangeQty) onChangeQty(qty);

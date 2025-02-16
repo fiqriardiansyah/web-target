@@ -10,17 +10,9 @@ import Tunaipng from '../../../asset/payment-tunai.png';
 import Placeholderpng from '../../../asset/placeholder.png';
 import Reportpng from '../../../asset/report.png';
 import ModalCustom, { ModalCustomProps } from "../../../components/modal/modal";
+import { useSalesContext } from "../../../hooks";
 import salesService from "../../../services/sales/sales";
 import { formatCurrency } from "../../../utils";
-// import { useNavigate } from "react-router-dom";
-
-interface PaymentProps extends ModalCustomProps {
-    customerID: number;
-    customerName: string;
-    salesID: number;
-    summaryReq: SummaryPrice;
-    summaryRes?: SummaryResponse;
-}
 
 const IMG_PAYMENT_CHANNEL = [
     {
@@ -45,37 +37,49 @@ const IMG_PAYMENT_CHANNEL = [
     },
 ];
 
-const Payment = ({ children, customerID, customerName, salesID, summaryReq, summaryRes, ...props }: PaymentProps) => {
+interface PaymentProps extends ModalCustomProps {
+    any?: unknown
+}
+
+const Payment = ({ children, ...props }: PaymentProps) => {
+    const { summaryPrice, summaryPriceMutation, state: { customer, sales }, resetAll } = useSalesContext();
     const closeRef = React.useRef<HTMLButtonElement | null>(null);
-    // const navigate = useNavigate();
+
+    const [notes, setNotes] = React.useState('');
 
     const paymentChannelQuery = useQuery({
-        queryFn: async () => (await salesService.PaymentChannel({ is_cc: summaryReq.is_cc })).data?.data,
-        queryKey: [salesService.paymentChannel],
+        queryFn: async () => (await salesService.PaymentChannel({ is_cc: summaryPrice!.is_cc })).data?.data,
+        queryKey: [salesService.paymentChannel, summaryPrice?.is_cc],
     });
 
     const createOrderMutation = useMutation({
-        mutationFn: async (data: CreateOrderReq) => (await salesService.CreateOrder(data)).data?.data,
+        mutationFn: async (data: Partial<CreateOrderReq>) => {
+            if (data.is_cc) {
+                return (await salesService.CreateOrderDp(data)).data?.data
+            }
+            return (await salesService.CreateOrder(data)).data?.data;
+        },
         onSuccess() {
+            resetAll();
             closeRef.current?.click();
-            // navigate(-1);
             message.success("Success Create Order!");
         },
     });
 
     const onCreateOrder = (channel: PaymentChannel) => {
-        const data: CreateOrderReq = {
-            is_service: summaryReq.is_service,
-            is_cc: summaryReq.is_cc,
+        const data: Partial<CreateOrderReq> = {
+            is_service: summaryPrice?.is_service,
+            is_cc: summaryPrice?.is_cc,
             payment_channel_id: channel.payment_channel_id,
-            voucher: [],
-            detail_product: summaryReq.product,
-            voucher_id: summaryReq.voucher_id,
-            voucher_matrix_id: summaryReq.voucher_matrix_id,
-            service_order: [],
-            customer_id: customerID,
-            sales_id: salesID,
-            payment_amount: summaryRes?.total_pembayaran,
+            voucher: summaryPrice?.voucher,
+            detail_product: summaryPrice?.product,
+            voucher_id: summaryPrice?.voucher_id,
+            voucher_matrix_id: summaryPrice?.voucher_matrix_id,
+            service_order: summaryPrice?.service,
+            customer_id: customer?.id,
+            sales_id: sales?.id,
+            payment_amount: summaryPriceMutation.data?.total_pembayaran,
+            notes
         }
         createOrderMutation.mutate(data);
     };
@@ -89,17 +93,17 @@ const Payment = ({ children, customerID, customerName, salesID, summaryReq, summ
                     </button>
                     <div className="w-full text-start flex items-start mt-5">
                         Nama Customer :
-                        <p className="font-semibold ml-5"> {customerName}</p>
+                        <p className="font-semibold ml-5"> {customer?.name}</p>
                     </div>
                     <div className="w-full text-start flex items-start">
                         Total Pembayaran :
-                        <p className="font-semibold ml-3"> {formatCurrency(summaryRes?.total_pembayaran || 0)}</p>
+                        <p className="font-semibold ml-3"> {formatCurrency(summaryPriceMutation.data?.total_pembayaran || 0)}</p>
                     </div>
 
                     <p className="mt-5">Catatan : </p>
                     <div className="w-full text-start flex items-start mt-1">
                         <div className="flex-1 mr-5">
-                            <TextArea rows={3} placeholder="Masukkan catatan jika diperlukan" />
+                            <TextArea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} placeholder="Masukkan catatan jika diperlukan" />
                         </div>
                         <button
                             onClick={() => { }}
@@ -121,7 +125,7 @@ const Payment = ({ children, customerID, customerName, salesID, summaryReq, summ
                                 {paymentChannelQuery.data?.map((val) => (
                                     <button
                                         onClick={() => onCreateOrder(val)}
-                                        className="col-span-1 bg-white text-sm font-semibold border borders border-gray-400 rounded h-[100px] flex items-center justify-center m-2"
+                                        className="cursor-pointer col-span-1 bg-white text-sm font-semibold border borders border-gray-400 rounded h-[100px] flex items-center justify-center m-2"
                                     >
                                         <img src={IMG_PAYMENT_CHANNEL.find((val2) => val2.value === val.payment_channel_id)?.img || Placeholderpng} alt="" className="h-[70px] mr-5" />
                                         {val.payment_channel_name}

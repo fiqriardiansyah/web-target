@@ -3,12 +3,12 @@ import { Button, Form, Space } from "antd";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { ControlledInput, MainCardProduct, ModalCustom, ModalCustomProps } from "../../../components";
-import { customVoucherSchema, CustomVoucherSchema, ServiceSchema } from "../../../schema";
+import { customVoucherSchema, CustomVoucherSchema } from "../../../schema";
 import { formatNumberWithDots, parseNumberFromDots } from "../../../utils";
 
 interface CustomVoucherProps extends ModalCustomProps {
     products?: Partial<Product>[];
-    services?: ({ id: number } & ServiceSchema)[];
+    services?: ({ id: number } & ServiceSummary)[];
     onSubmit?: (v: VoucherCustomSummary) => void;
     voucherCustoms?: VoucherCustomSummary[];
 }

@@ -4,6 +4,7 @@ import React from "react";
 import { ModalCustom, ModalCustomProps } from "../../../components";
 import { useSalesContext } from "../../../hooks";
 import { salesService } from "../../../services";
+import eventEmitter from "../../../config/event";
 
 const ChooseVoucher = ({ children, ...props }: ModalCustomProps) => {
     const { setState, state: { vouchers } } = useSalesContext();
@@ -16,6 +17,10 @@ const ChooseVoucher = ({ children, ...props }: ModalCustomProps) => {
         queryFn: async () => (await salesService.Voucher({ page })).data?.data,
         queryKey: [page]
     });
+
+    React.useEffect(() => {
+        eventEmitter.emit("SUMMARY_PRICE", { voucher_id: vouchers.map((v) => v.id) } as Partial<SummaryPrice>);
+    }, [vouchers]);
 
     const onClickVoucher = (voucher: Voucher) => {
         return () => {
@@ -34,7 +39,7 @@ const ChooseVoucher = ({ children, ...props }: ModalCustomProps) => {
                     ...prev,
                     vouchers: [...prev.vouchers, voucher]
                 }
-            })
+            });
         }
     }
 
