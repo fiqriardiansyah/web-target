@@ -41,7 +41,7 @@ export const SalesProvider = ({ children }: { children: React.ReactElement }) =>
     const summaryPrice: SummaryPrice = {
         is_cc: state.is_cc, //
         is_service: state.is_service, //
-        product: productFlatten.map((p) => ({ price: p.product_price, product_id: p.product_id, qty: p.qty }) as ProductSummary), //
+        product: productFlatten.map((p) => ({ price: p.product_price, product_id: p.product_id, qty: p?.qty || 1 }) as ProductSummary), //
         service: state?.services.map((s) => {
             const { id: _id, price, service_name } = s;
             return { price: Number(price), service_name }

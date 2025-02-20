@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { ControlledInput, MainCardProduct, ModalCustom, ModalCustomProps } from "../../../components";
 import { customVoucherSchema, CustomVoucherSchema } from "../../../schema";
 import { formatNumberWithDots, parseNumberFromDots } from "../../../utils";
+import { useSalesContext } from "../../../hooks";
 
 interface CustomVoucherProps extends ModalCustomProps {
     products?: Partial<Product>[];
@@ -14,6 +15,7 @@ interface CustomVoucherProps extends ModalCustomProps {
 }
 
 const CustomVoucher = ({ onSubmit, voucherCustoms = [], products = [], services = [], children, ...props }: CustomVoucherProps) => {
+    const { summaryPriceMutation } = useSalesContext();
 
     const closeRef = React.useRef<HTMLButtonElement | null>(null);
     const [typeCut, setTypeCut] = React.useState<"percentage" | "price">("percentage");
@@ -25,9 +27,17 @@ const CustomVoucher = ({ onSubmit, voucherCustoms = [], products = [], services 
         resolver: zodResolver(customVoucherSchema),
     });
 
+    const productsCanDiscount = !summaryPriceMutation?.data?.list_discount?.length
+        ? products
+        : products.filter((p) => !summaryPriceMutation.data.list_discount.find((v) => v.product_id === p.product_id));
+
+    const servicesCanDiscount = !summaryPriceMutation?.data?.list_discount?.length
+        ? services
+        : services.filter((s) => !summaryPriceMutation.data?.list_discount?.find((v) => v.service_name === s.service_name));
+
     const percentage = watch("percentage");
     const price = watch("price");
-    const minPrice = Math.min(...products.map((p) => Number(p.product_price)), ...services.map((s) => Number(s.price)));
+    const minPrice = Math.min(...productsCanDiscount.map((p) => Number(p.product_price)), ...services.map((s) => Number(s.price)));
 
     React.useEffect(() => {
         const percent = parseNumberFromDots(percentage);
@@ -125,7 +135,7 @@ const CustomVoucher = ({ onSubmit, voucherCustoms = [], products = [], services 
                                     </Button>
                                 </div>
                                 <div className="my-5 grid grid-cols-3 gap-4">
-                                    {products?.map((p) => (
+                                    {productsCanDiscount.map((p) => (
                                         <div className="relative">
                                             {selectedProduct.find((id) => id === p.product_id) && (
                                                 <div className="bg-black/30 w-full rounded h-full absolute top-0 left-0 z-10 pointer-events-none flex items-center justify-center">
@@ -137,7 +147,7 @@ const CustomVoucher = ({ onSubmit, voucherCustoms = [], products = [], services 
                                             <MainCardProduct.AsMiniCard onClick={onClickProduct} key={p.product_id} product={p} />
                                         </div>
                                     ))}
-                                    {services?.map((p) => (
+                                    {servicesCanDiscount?.map((p) => (
                                         <div className="relative">
                                             {selectedService.find((id) => id === p.id) && (
                                                 <div className="bg-black/30 w-full rounded h-full absolute top-0 left-0 z-10 pointer-events-none flex items-center justify-center">

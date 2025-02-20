@@ -15,7 +15,13 @@ import { useMutation } from "@tanstack/react-query";
 import { salesService } from "../../../services";
 
 export default function SummarySales() {
-    const { state: { packages, products, vouchers, services, voucherCustom, sales, customer }, setState, resetAll, summaryPriceMutation, summaryPrice } = useSalesContext();
+    const {
+        state: { packages, products, vouchers, services, voucherCustom, sales, customer },
+        setState,
+        resetAll,
+        summaryPriceMutation,
+        summaryPrice
+    } = useSalesContext();
 
     const { setValue, watch, reset } = useForm<SummaryPriceSchema>({
         mode: "onChange",
@@ -221,7 +227,7 @@ export default function SummarySales() {
                     {({ openModal }) => (
                         <Button
                             loading={summaryPriceMutation.isPending}
-                            disabled={!Object.keys(summaryPriceMutation.data || {}).length}
+                            disabled={!Object.keys(summaryPriceMutation.data || {}).length || !sales}
                             type="primary"
                             size="large"
                             className="mt-10"
