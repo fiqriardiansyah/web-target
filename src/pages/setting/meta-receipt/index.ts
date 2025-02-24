@@ -1,0 +1,1 @@
+export { default as MetaReceiptPage } from './meta-receipt';

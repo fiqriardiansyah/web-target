@@ -4,6 +4,7 @@ import { GlobalContextType, GlobalContext } from "../context";
 import { ADDRESS_USER, COMPANY_USER, EMAIL_USER, NAME_USER, NPWP_USER, TOKEN_USER } from "../@constant/constant";
 
 export function useGlobalContext() {
+
     const context = React.useContext(GlobalContext) as GlobalContextType;
     if (!context) {
         throw new Error('useGlobalContext should be inside of GlobalProvider');
@@ -26,9 +27,10 @@ export function useGlobalContext() {
         Cookies.remove(COMPANY_USER);
         Cookies.remove(NPWP_USER);
         Cookies.remove(EMAIL_USER);
+        Cookies.remove("headerFooter");
     }
 
-    const isLogin = !!context.login?.token
+    const isLogin = !!context.login?.token && context.login.name && context.login.npwp && context.login.email && context.login.company_name
 
     return { ...context, saveUser, removeUser, isLogin };
 }

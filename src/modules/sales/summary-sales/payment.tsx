@@ -8,7 +8,7 @@ import Qrcodepng from '../../../asset/payment-qrcode.png';
 import Transferpng from '../../../asset/payment-transfer.png';
 import Tunaipng from '../../../asset/payment-tunai.png';
 import Placeholderpng from '../../../asset/placeholder.png';
-import Reportpng from '../../../asset/report.png';
+import { ButtonPrint } from "../../../components";
 import ModalCustom, { ModalCustomProps } from "../../../components/modal/modal";
 import { useSalesContext } from "../../../hooks";
 import salesService from "../../../services/sales/sales";
@@ -105,13 +105,7 @@ const Payment = ({ children, ...props }: PaymentProps) => {
                         <div className="flex-1 mr-5">
                             <TextArea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} placeholder="Masukkan catatan jika diperlukan" />
                         </div>
-                        <button
-                            onClick={() => { }}
-                            className="bg-gray-100 cursor-pointer text-gray-500 text-sm font-semibold border borders border-gray-400 rounded h-[75px] w-[300px] flex items-center justify-center"
-                        >
-                            <img src={Reportpng} alt="" className="w-[50px] mr-5" />
-                            Print Performa Invoice
-                        </button>
+                        <ButtonPrint text="Print Performa Invoice" />
                     </div>
 
                     {(paymentChannelQuery?.isPending || createOrderMutation.isPending) && <div className="w-full flex items-center h-[150px] justify-center col-span-3">

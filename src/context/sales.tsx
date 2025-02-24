@@ -4,7 +4,7 @@ import { SalesContext } from ".";
 import eventEmitter from "../config/event";
 import { salesService } from "../services";
 
-export type State = {
+type State = {
     sales?: SalesName;
     customer?: SearchCustomer;
     products: Product[];

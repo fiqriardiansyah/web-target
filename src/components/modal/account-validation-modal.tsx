@@ -9,11 +9,11 @@ import ModalCustom, { ModalCustomProps } from "./modal";
 import { useMutation } from "@tanstack/react-query";
 import { authService } from "../../services";
 
-interface AccountValidationModal extends ModalCustomProps {
+interface AccountValidationModalProps extends ModalCustomProps {
     onSuccess: () => void;
 }
 
-const AccountValidationModal = ({ onSuccess, children, ...props }: AccountValidationModal) => {
+const AccountValidationModal = ({ onSuccess, children, ...props }: AccountValidationModalProps) => {
     const closeRef = React.useRef<HTMLButtonElement | null>(null);
 
     const { control, handleSubmit, reset } = useForm<AccountValidationSchema>({

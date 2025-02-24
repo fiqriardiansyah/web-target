@@ -2,7 +2,7 @@ import React from "react";
 import { ProductPackageContext } from ".";
 import eventEmitter from "../config/event";
 
-export type State = { store?: boolean; query?: string; type?: "unit" | "package"; products: Product[]; packages: ProductPackage[] }
+type State = { store?: boolean; query?: string; type?: "unit" | "package"; products: Product[]; packages: ProductPackage[] }
 
 export type ProductPackageContextType = {
     state: State;

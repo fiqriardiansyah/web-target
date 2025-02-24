@@ -5,6 +5,8 @@ import { ADDRESS_USER, COMPANY_USER, EMAIL_USER, NAME_USER, NPWP_USER, TOKEN_USE
 
 export type GlobalContextType = {
     login: AuthResponse,
+    loading: boolean,
+    setLoading: React.Dispatch<React.SetStateAction<boolean>>,
     setLogin: React.Dispatch<React.SetStateAction<AuthResponse>>;
 }
 
@@ -17,9 +19,10 @@ export const GlobalProvider = ({ children }: { children: React.ReactElement }) =
         npwp: Cookies.get(NPWP_USER),
         token: Cookies.get(TOKEN_USER),
     });
+    const [loading, setLoading] = React.useState(false);
 
     return (
-        <GlobalContext.Provider value={{ login, setLogin }}>
+        <GlobalContext.Provider value={{ login, setLogin, loading, setLoading }}>
             {children}
         </GlobalContext.Provider>
     )

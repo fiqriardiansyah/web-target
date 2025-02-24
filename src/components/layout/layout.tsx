@@ -6,8 +6,12 @@ export default function Layout() {
 
     return (
         <>
-            {location.pathname !== '/' && <Navbar />}
-            <div className="h-[20px]"></div>
+            {location.pathname !== '/' &&
+                <>
+                    <Navbar />
+                    <div className="h-[100px]"></div>
+                </>
+            }
             <Outlet />
         </>
     )
