@@ -86,6 +86,8 @@ interface SummaryResponse {
     cc_charge: number;
     cc_charge_name: string;
     total_pembayaran: number;
+    dp_amount?: number;
+    sisa_pembayaran?: number;
 }
 
 interface ListDiscount {

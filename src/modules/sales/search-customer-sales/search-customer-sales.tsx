@@ -107,7 +107,7 @@ export default function SearchCustomerSales({ onChooseOrder, onCreateNewOrder, .
                         </>
                     ))}
 
-                    <Button onClick={onCreateNewOrderClick(customer!)} disabled={!customer} type="primary" className="w-full mt-5" size="large">
+                    <Button onClick={onCreateNewOrderClick(customer!)} disabled={!customer || pendingQuery.isPending} type="primary" className="w-full mt-5" size="large">
                         Create New Order
                     </Button>
                 </div>

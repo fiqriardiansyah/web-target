@@ -3,7 +3,7 @@ import AuthenticationRoute from "./authentication-route";
 // pages
 import { Layout } from "../components";
 import {
-    AuthPage, HomePage, MetaReceiptPage, ReportPage, SalesPage, SettingPage, TransactionDetailPage, TransactionPage
+    AuthPage, DPSalesPage, HomePage, MetaReceiptPage, ReportPage, SalesPage, SettingPage, TransactionDetailPage, TransactionPage
 } from "../pages";
 
 export default function AppRoutes() {
@@ -14,6 +14,7 @@ export default function AppRoutes() {
                 <Route element={<AuthenticationRoute />}>
                     <Route path="/" element={<HomePage />} />
                     <Route path="/sales" element={<SalesPage />} />
+                    <Route path="/dp-sales" element={<DPSalesPage />} />
                     <Route path="/setting">
                         <Route index path="" element={<SettingPage />} />
                         <Route path="meta-receipt" element={<MetaReceiptPage />} />

@@ -1,20 +1,25 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { CloseCircleOutlined } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { Button, message, Switch } from "antd";
+import React from "react";
 import { useForm } from "react-hook-form";
 import PlaceholderPng from '../../../asset/placeholder.png';
 import { AccountValidationModal, MainCardProduct } from "../../../components";
-import { useSalesContext } from "../../../hooks";
+import { useNavbarContext, useSalesContext } from "../../../hooks";
 import { summaryPriceSchema, SummaryPriceSchema } from "../../../schema";
+import { salesService } from "../../../services";
 import { formatCurrency, formatNumberWithDots } from "../../../utils";
 import ChooseVoucher from "./choose-voucher";
 import CustomVoucher from "./custom-voucher";
-import Payment from "./payment";
-import { useMutation } from "@tanstack/react-query";
-import { salesService } from "../../../services";
 
-export default function SummarySales() {
+interface SummarySalesProps {
+    children?: React.ReactNode;
+    paymentComponent?: React.ReactNode;
+}
+
+export default function SummarySales({ children, paymentComponent }: SummarySalesProps) {
     const {
         state: { packages, products, vouchers, services, voucherCustom, sales, customer },
         setState,
@@ -22,6 +27,7 @@ export default function SummarySales() {
         summaryPriceMutation,
         summaryPrice
     } = useSalesContext();
+    const { setExtraComponent } = useNavbarContext();
 
     const { setValue, watch, reset } = useForm<SummaryPriceSchema>({
         mode: "onChange",
@@ -84,7 +90,7 @@ export default function SummarySales() {
             customer_id: customer?.id,
             sales_id: sales?.id,
             payment_amount: summaryPriceMutation.data?.total_pembayaran,
-            notes: ""
+            notes: "",
         }
         draftOrderMutation.mutate(data);
     }
@@ -97,12 +103,19 @@ export default function SummarySales() {
         return discounts?.reduce((sum, curr) => sum + curr.discount_price, 0)
     }
 
+    React.useEffect(() => {
+        setExtraComponent(<Button onClick={onDraftClick} loading={draftOrderMutation.isPending} type="primary" size="large" className="w-[100px]">
+            Draft
+        </Button>);
+
+        return () => {
+            setExtraComponent(null);
+        }
+    }, [draftOrderMutation.isPending]);
+
     if (!productFlatten.length && !services.length) return null;
     return (
         <div className="w-[500px] flex flex-col items-end gap-3">
-            <Button onClick={onDraftClick} loading={draftOrderMutation.isPending} type="primary" size="large" className="w-fit">
-                Draft
-            </Button>
             <div className=" h-fit flex flex-col gap-2 border border-gray-300 rounded p-3 sticky-10">
                 <p className="text-gray-800 text-sm font-semibold">Ringkasan</p>
                 <div className="flex flex-col gap-3 mt-5">
@@ -149,6 +162,8 @@ export default function SummarySales() {
                         )}
                     </CustomVoucher>
                 </div>
+
+                {children}
 
                 <div className="w-full text-start flex items-start mt-3">
                     <p className="flex-1 text-[14px]">Service Charge</p>
@@ -223,19 +238,29 @@ export default function SummarySales() {
                     </div>
                 ) : null}
 
-                <Payment>
-                    {({ openModal }) => (
-                        <Button
-                            loading={summaryPriceMutation.isPending}
-                            disabled={!Object.keys(summaryPriceMutation.data || {}).length || !sales}
-                            type="primary"
-                            size="large"
-                            className="mt-10"
-                            onClick={openModal}>
-                            Bayar
-                        </Button>
-                    )}
-                </Payment>
+                {summaryPriceMutation.data?.dp_amount ? (
+                    <div className="w-full text-start flex items-start mt-3">
+                        <div className="flex-1 text-[12px]">
+                            Down Payment
+                        </div>
+                        <p className="text-[14px] font-medium text-red-400">
+                            {formatCurrency(summaryPriceMutation.data?.dp_amount)}
+                        </p>
+                    </div>
+                ) : null}
+
+                {summaryPriceMutation.data?.sisa_pembayaran ? (
+                    <div className="w-full text-start flex items-start mt-3">
+                        <div className="flex-1 text-[14px] font-semibold">
+                            Sisa Pembayaran
+                        </div>
+                        <p className="text-[14px] font-semibold">
+                            {formatCurrency(summaryPriceMutation.data?.sisa_pembayaran)}
+                        </p>
+                    </div>
+                ) : null}
+
+                {paymentComponent}
             </div>
         </div>
     );

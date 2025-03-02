@@ -9,3 +9,5 @@ export const SalesContext = React.createContext({});
 export const MetaReceiptContext = React.createContext({});
 
 export const NavbarContext = React.createContext({});
+
+export const ConstantContext = React.createContext({});

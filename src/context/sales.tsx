@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useMutation, UseMutationResult } from "@tanstack/react-query";
 import React from "react";
 import { SalesContext } from ".";
@@ -10,6 +11,7 @@ type State = {
     products: Product[];
     is_cc: number;
     is_service: number;
+    dp_amount?: number;
     packages: ProductPackage[];
     vouchers: Voucher[];
     services: ({ id: number } & ServiceSummary)[];
@@ -43,16 +45,17 @@ export const SalesProvider = ({ children }: { children: React.ReactElement }) =>
         is_service: state.is_service, //
         product: productFlatten.map((p) => ({ price: p.product_price, product_id: p.product_id, qty: p?.qty || 1 }) as ProductSummary), //
         service: state?.services.map((s) => {
-            const { id: _id, price, service_name } = s;
+            const { id, price, service_name } = s;
             return { price: Number(price), service_name }
         }),
         voucher: state.voucherCustom.map((vc) => {
-            const { id: _id, ...rest } = vc;
+            const { id, ...rest } = vc;
             return rest;
         }),
         voucher_id: state.vouchers.map((v) => v.id),
         voucher_matrix_id: [],
         customer_id: state?.customer?.id,
+        dp_amount: state?.dp_amount,
     };
 
     React.useEffect(() => {

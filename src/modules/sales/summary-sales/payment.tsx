@@ -1,63 +1,27 @@
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { MutationFunction, useMutation } from "@tanstack/react-query";
 import { Button, Form, message, Spin } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import React from "react";
 import { useForm } from "react-hook-form";
-import CreditPng from '../../../asset/payment-credit.png';
-import Debitpng from '../../../asset/payment-debit.png';
-import Qrcodepng from '../../../asset/payment-qrcode.png';
-import Transferpng from '../../../asset/payment-transfer.png';
-import Tunaipng from '../../../asset/payment-tunai.png';
+import { MAX_CUSTOM_PAYMENTS, PAYMENT_CHANNEL } from "../../../@constant";
 import Placeholderpng from '../../../asset/placeholder.png';
 import TargetPng from '../../../asset/target.png';
 import { ButtonPrint, ControlledInputNumber } from "../../../components";
-import ModalCustom, { ModalCustomProps } from "../../../components/modal/modal";
+import ModalCustom, { ModalCustomProps, HandlerProps as ModalHandlerProps } from "../../../components/modal/modal";
 import { useSalesContext } from "../../../hooks";
 import { editPriceSchema, EditPriceSchema } from "../../../schema";
-import salesService from "../../../services/sales/sales";
 import { formatCurrency, parseNumberFromDots } from "../../../utils";
 
-const MAX_CUSTOM_PAYMENTS = 2;
-const PAYMENT_CUSTOM_ID = 11;
-const PAYMENT_CHANNEL_IMAGES = [
-    {
-        value: 6,
-        img: Tunaipng,
-        text: 'TUNAI'
-    },
-    {
-        value: 7,
-        img: Transferpng,
-        text: 'TRANSFER'
-    },
-    {
-        value: 8,
-        img: Qrcodepng,
-        text: 'QRIS'
-    },
-    {
-        value: 9,
-        img: Debitpng,
-        text: 'DEBIT'
-    },
-    {
-        value: 10,
-        img: CreditPng,
-        text: 'CREDIT'
-    },
-    {
-        value: PAYMENT_CUSTOM_ID,
-    },
-];
-
-
 interface PaymentProps extends ModalCustomProps {
-    any?: unknown
+    children: (ctrl: ModalHandlerProps & { loading?: boolean; }) => void;
+    payments?: PaymentChannelConstant[];
+    createOrderMutationFn?: MutationFunction<string, Partial<CreateOrderReq>> | undefined;
+    detailPaymentComponent?: React.ReactNode;
 }
 
-const Payment = ({ children, ...props }: PaymentProps) => {
+const Payment = ({ payments, createOrderMutationFn, detailPaymentComponent, children, ...props }: PaymentProps) => {
     const { summaryPrice, summaryPriceMutation, state: { customer, sales }, resetAll } = useSalesContext();
     const closeRef = React.useRef<HTMLButtonElement | null>(null);
 
@@ -68,21 +32,10 @@ const Payment = ({ children, ...props }: PaymentProps) => {
 
     const isMaxCustomPayment = customPayments.length >= MAX_CUSTOM_PAYMENTS;
 
-    const paymentChannelQuery = useQuery({
-        queryFn: async () => (await salesService.PaymentChannel({ is_cc: summaryPrice!.is_cc })).data?.data,
-        queryKey: [salesService.paymentChannel, summaryPrice?.is_cc],
-    });
-
     const createOrderMutation = useMutation({
-        mutationFn: async (data: Partial<CreateOrderReq>) => {
-            if (data.is_cc) {
-                return (await salesService.CreateOrderDp(data)).data?.data
-            }
-            return (await salesService.CreateOrder(data)).data?.data;
-        },
+        mutationFn: createOrderMutationFn,
         onSuccess() {
             resetAll();
-            closeRef.current?.click();
             message.success("Success Create Order!");
         },
     });
@@ -118,11 +71,12 @@ const Payment = ({ children, ...props }: PaymentProps) => {
     }
 
     const onChoosePayment = (channelId: number) => {
-        if (channelId === PAYMENT_CUSTOM_ID) {
+        if (channelId === PAYMENT_CHANNEL.CUSTOM.id) {
             setIsCustomPayment(true);
             return;
         }
         onPay(channelId);
+        closeRef.current?.click();
     };
 
     const { control, handleSubmit, watch } = useForm<EditPriceSchema>({
@@ -139,12 +93,17 @@ const Payment = ({ children, ...props }: PaymentProps) => {
         setSelectedInputCustomPrice(customPayments[0]);
     }, [isMaxCustomPayment, customPayments]);
 
-    const onSubmitForm = (data: EditPriceSchema) => {
+    const onPayPaymentCustom = (data: EditPriceSchema) => {
         console.log(data);
     };
 
     return (
-        <ModalCustom width={1000} title={<p className="font-semibold text-lg">Pembayaran</p>} {...props} handlerInComponent={children} footer={null}>
+        <ModalCustom
+            width={1000}
+            title={<p className="font-semibold text-lg">Pembayaran</p>}
+            {...props}
+            handlerInComponent={(ctrl) => children({ ...ctrl, loading: createOrderMutation.isPending })}
+            footer={null}>
             {(ctrl) => (
                 <>
                     <button ref={closeRef} type="button" className="hidden" onClick={ctrl.closeModal}>
@@ -158,12 +117,12 @@ const Payment = ({ children, ...props }: PaymentProps) => {
                             </div>
                             <p className="font-semibold mt-4">Silahkan pilih {MAX_CUSTOM_PAYMENTS} tipe pembayaran</p>
                             <div className="p-2 grid grid-cols-5 gap-3 bg-slate-200 mt-4">
-                                {PAYMENT_CHANNEL_IMAGES.filter((i) => i.value !== PAYMENT_CUSTOM_ID).map((val) => {
-                                    const isPick = customPayments.find((c) => c === val.value);
+                                {payments?.filter((i) => i.id !== PAYMENT_CHANNEL.CUSTOM.id).map((val) => {
+                                    const isPick = customPayments.find((c) => c === val.id);
                                     return (
                                         <button
-                                            key={val.value}
-                                            onClick={onPaymentCustoms(val.value)}
+                                            key={val.id}
+                                            onClick={onPaymentCustoms(val.id)}
                                             style={{ filter: !isPick && isMaxCustomPayment ? 'grayscale(1)' : '' }}
                                             className={`
                                                 ${isPick ? 'bg-primary/20' : 'bg-white'} cursor-pointer col-span-1 text-sm font-semibold p-3 rounded h-[100px] shadow-lg flex-col hover:shadow flex items-center justify-center m-2
@@ -179,7 +138,7 @@ const Payment = ({ children, ...props }: PaymentProps) => {
                                 <div className="flex flex-col mt-10">
                                     <p className="text-lg mb-7">Total Pembayaran <span className="font-bold ml-2 text-xl">{formatCurrency(summaryPriceMutation.data?.total_pembayaran || 0)}</span></p>
                                     {customPayments.map((id, index) => {
-                                        const payment = PAYMENT_CHANNEL_IMAGES.find((p) => p.value === id);
+                                        const payment = payments?.find((p) => p.id === id);
                                         return (
                                             <>
                                                 <div onClick={() => setSelectedInputCustomPrice(id)} className="flex gap-8 cursor-pointer" key={id}>
@@ -189,7 +148,7 @@ const Payment = ({ children, ...props }: PaymentProps) => {
                                                     <div className="flex flex-col gap-2">
                                                         <p className="font-semibold">Pembayaran {payment?.text}</p>
                                                         {selectedInputCustomPrice === id ? (
-                                                            <Form className="flex gap-4" onFinish={handleSubmit(onSubmitForm)}>
+                                                            <Form className="flex gap-4" onFinish={handleSubmit(onPayPaymentCustom)}>
                                                                 <ControlledInputNumber
                                                                     name="price"
                                                                     inputProps={{ addonBefore: 'Rp', size: 'large', placeholder: 'Masukkan nominal potongan', className: 'w-[300px]' }}
@@ -214,14 +173,18 @@ const Payment = ({ children, ...props }: PaymentProps) => {
                         </div>
                     ) : (
                         <div className="">
-                            <div className="w-full text-start flex items-start mt-5">
-                                Nama Customer :
-                                <p className="font-semibold ml-5"> {customer?.name}</p>
-                            </div>
-                            <div className="w-full text-start flex items-start">
-                                Total Pembayaran :
-                                <p className="font-semibold ml-3"> {formatCurrency(summaryPriceMutation.data?.total_pembayaran || 0)}</p>
-                            </div>
+                            {detailPaymentComponent || (
+                                <>
+                                    <div className="w-full text-start flex items-start mt-5">
+                                        Nama Customer :
+                                        <p className="font-semibold ml-5"> {customer?.name}</p>
+                                    </div>
+                                    <div className="w-full text-start flex items-start">
+                                        Total Pembayaran :
+                                        <p className="font-semibold ml-3"> {formatCurrency(summaryPriceMutation.data?.total_pembayaran || 0)}</p>
+                                    </div>
+                                </>
+                            )}
 
                             <p className="mt-5">Catatan : </p>
                             <div className="w-full text-start flex items-start mt-1">
@@ -231,27 +194,23 @@ const Payment = ({ children, ...props }: PaymentProps) => {
                                 <ButtonPrint text="Print Performa Invoice" />
                             </div>
 
-                            {(paymentChannelQuery?.isPending || createOrderMutation.isPending) && <div className="w-full flex items-center h-[150px] justify-center col-span-3">
+                            {createOrderMutation.isPending && <div className="w-full flex items-center h-[150px] justify-center col-span-3">
                                 <Spin size="large" />
                             </div>}
 
-                            {!paymentChannelQuery.isLoading &&
-                                <>
-                                    <p className="mt-5 font-semibold">Pembayaran Melalui : </p>
-                                    <div className="w-full grid grid-cols-3 mt-1 bg-gray-100 p-5">
-                                        {paymentChannelQuery.data?.map((val) => (
-                                            <button
-                                                onClick={() => onChoosePayment(val.payment_channel_id)}
-                                                className="cursor-pointer col-span-1 bg-white text-sm font-semibold border borders border-gray-400 rounded h-[100px] flex items-center justify-center m-2"
-                                            >
-                                                <img src={PAYMENT_CHANNEL_IMAGES.find((val2) => val2.value === val.payment_channel_id)?.img || Placeholderpng} alt="" className="h-[70px] mr-5" />
-                                                {val.payment_channel_name}
-                                            </button>
-                                        ))}
+                            <p className="mt-5 font-semibold">Pembayaran Melalui : </p>
+                            <div className="w-full grid grid-cols-3 mt-1 bg-gray-100 p-5">
+                                {payments?.map((val) => (
+                                    <button
+                                        onClick={() => onChoosePayment(val.id)}
+                                        className="cursor-pointer col-span-1 bg-white text-sm font-semibold border borders border-gray-400 rounded h-[100px] flex items-center justify-center m-2"
+                                    >
+                                        <img src={payments?.find((p) => p.id === val.id)?.img || Placeholderpng} alt="" className="h-[70px] mr-5" />
+                                        {val.text}
+                                    </button>
+                                ))}
 
-                                    </div>
-                                </>
-                            }
+                            </div>
                         </div>
                     )}
                 </>

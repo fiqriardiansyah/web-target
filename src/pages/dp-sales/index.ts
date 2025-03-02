@@ -1,0 +1,1 @@
+export { default as DPSalesPage } from './dp-sales';

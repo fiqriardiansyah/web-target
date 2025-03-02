@@ -21,6 +21,8 @@ export default function FilterSales() {
             services: [],
             packages: [],
             products: order.list.map((el) => ({
+                id: el.product_id,
+                price: Number(el.product_price),
                 product_id: el.product_id,
                 product_price: Number(el.product_price),
                 stock: el.stock,

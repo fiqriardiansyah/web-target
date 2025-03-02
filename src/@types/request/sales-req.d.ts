@@ -38,6 +38,7 @@ interface SummaryPrice {
     voucher_id: number[];
     voucher_matrix_id: number[];
     customer_id?: number;
+    dp_amount?: number;
 }
 
 interface SummaryPriceDP extends SummaryPrice {
@@ -58,4 +59,5 @@ interface CreateOrderReq {
     service_order: unknown[];
     customer_id: number;
     sales_id: number;
+    dp_amount?: number;
 }
