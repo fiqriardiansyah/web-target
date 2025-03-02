@@ -10,7 +10,7 @@ import { ButtonPrint, Loading, MainCardProduct, StateRender } from "../../compon
 import transactionService from "../../services/transaction/transaction";
 import { formatCurrency } from "../../utils";
 
-import { ModalCancelNote } from "../../modules";
+import { ModalCancelNote, ModalUploadReceipt } from "../../modules";
 
 export default function TransactionDetail() {
     const navigate = useNavigate();
@@ -28,10 +28,14 @@ export default function TransactionDetail() {
         onSettled: () => detailQuery.refetch(),
     });
 
-    // const uploadReceiptMutation = useMutation({
-    //     mutationFn: async (dt: UploadReceipt) => (await transactionService.UploadReceipt(dt)).data?.data,
-    //     onSettled: () => detailQuery.refetch(),
-    // })
+    const uploadReceiptMutation = useMutation({
+        mutationFn: async (dt: UploadReceipt) => (await transactionService.UploadReceipt(dt)).data?.data,
+        onSettled: () => detailQuery.refetch(),
+    })
+
+    const onUploadReceipt = (base64: string) => {
+        uploadReceiptMutation.mutateAsync({ id: parseInt(id!), receipt_image: base64 });
+    }
 
     React.useEffect(() => {
         setExtraComponent(() => (
@@ -131,9 +135,19 @@ export default function TransactionDetail() {
                                     </div>
                                 )}
 
-                                <Button loading={detailQuery.isPending} type="primary" className="w-[300px]" size="large">
-                                    Upload Bukti Pembayaran
-                                </Button>
+                                {!detailQuery.data?.image && (
+                                    <ModalUploadReceipt onSubmit={onUploadReceipt}>
+                                        {({ openModal }) => (
+                                            <Button
+                                                onClick={openModal}
+                                                loading={uploadReceiptMutation.isPending || detailQuery.isPending}
+                                                type="primary" className="w-[300px]" size="large">
+                                                Upload Bukti Pembayaran
+                                            </Button>
+                                        )}
+                                    </ModalUploadReceipt>
+                                )}
+
                                 <ButtonPrint text="Print Struk Transaksi" />
                                 {detailQuery.data?.is_cancellation_req ? (
                                     <div className="bg-red-600/40 text-white flex items-center justify-center py-3 w-[300px] rounded-lg font-semibold">
@@ -159,15 +173,18 @@ export default function TransactionDetail() {
                             </div>
                         </div>
                         <div className="flex flex-col gap-4">
-                            {detailQuery.data?.list_detail_order?.map((p) => (
-                                <div className="flex items-center justify-between bg-gray-100 hover:shadow shadow-lg p-3">
-                                    <MainCardProduct.Simple product={{
-                                        product_name: p.product_name,
-                                        product_price: p.price,
-                                    }} />
-                                    <div className="bg-gray-300 text-gray-900 w-8 h-8 flex items-center justify-center rounded">{p.qty}</div>
-                                </div>
-                            ))}
+                            {detailQuery.data?.list_detail_order?.map((p) => {
+                                // const discount = detailQuery.data.list_voucher_custom.find((v) => v.product_id === p.product_id)
+                                return (
+                                    <div className="flex items-center justify-between bg-gray-100 hover:shadow shadow-lg p-3">
+                                        <MainCardProduct.Simple product={{
+                                            product_name: p.product_name,
+                                            product_price: p.price,
+                                        }} />
+                                        <div className="bg-gray-300 text-gray-900 w-8 h-8 flex items-center justify-center rounded">{p.qty}</div>
+                                    </div>
+                                )
+                            })}
                         </div>
                     </div>
                 </StateRender.Data>

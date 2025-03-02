@@ -97,7 +97,7 @@ function AsMiniCard({ product, onClick }: MainCardProductProps) {
     )
 }
 
-function Simple({ product }: MainCardProductProps) {
+function Simple({ product, discount }: MainCardProductProps & { discount?: number }) {
     const image = typeof product?.product_images === "string"
         ? product?.product_images
         : product?.product_images?.length
@@ -109,7 +109,10 @@ function Simple({ product }: MainCardProductProps) {
             <img src={image} alt={product?.product_name} className="w-[70px] h-[50px] object-cover rounded bg-gray-100 mr-2" />
             <div className="flex flex-col gap-2">
                 {product?.product_name}
-                <p className="font-bold text-[12px]">{formatCurrency(product?.product_price)}</p>
+                <p className="font-bold text-[12px]">
+                    {formatCurrency(product?.product_price)}
+                    {discount && <span className="text-red-400 ml-4">({formatCurrency(discount)})</span>}
+                </p>
             </div>
         </div>
     )
