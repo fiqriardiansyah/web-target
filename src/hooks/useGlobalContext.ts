@@ -6,7 +6,7 @@ import { ADDRESS_USER, COMPANY_USER, EMAIL_USER, NAME_USER, NPWP_USER, TOKEN_USE
 export function useGlobalContext() {
 
     const context = React.useContext(GlobalContext) as GlobalContextType;
-    if (!context) {
+    if (!context || Object.keys(context).length === 0) {
         throw new Error('useGlobalContext should be inside of GlobalProvider');
     }
 

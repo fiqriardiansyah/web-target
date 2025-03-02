@@ -7,7 +7,7 @@ import Cookies from "js-cookie";
 export function useMetaReceiptContext() {
 
     const context = React.useContext(MetaReceiptContext) as MetaReceiptContextType;
-    if (!context) {
+    if (!context || Object.keys(context).length === 0) {
         throw new Error('useMetaReceiptContext should be inside of MetaReceiptProvider');
     }
 
